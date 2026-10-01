@@ -40,6 +40,24 @@ const { titulo, descripcion = site.descripcion } = Astro.props;
         d.dataset.theme = t === "light" || t === "dark" ? t : "light";
       })();
     </script>
+    <!-- Google Analytics 4 -->
+    <script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-FJ0D00LM37"></script>
+    <script is:inline>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-FJ0D00LM37');
+
+      document.addEventListener('click', function (e) {
+        var a = e.target.closest('a');
+        if (!a) return;
+        var canal = a.href.includes('wa.me') ? 'whatsapp'
+                  : a.href.startsWith('mailto:') ? 'email' : null;
+        if (canal) gtag('event', 'contacto_click', {
+          canal: canal, pagina: location.pathname
+        });
+      });
+    </script>
   </head>
   <body class="flex min-h-screen flex-col">
     <Header />
