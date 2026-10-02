@@ -11,9 +11,11 @@ import { ruta } from "../lib/rutas";
 
 interface Props {
   plan: Plan;
+  /** Preguntas de los planes anteriores: cada plan incluye al anterior. */
+  heredadas?: string[];
   class?: string;
 }
-const { plan, class: className = "" } = Astro.props;
+const { plan, heredadas = [], class: className = "" } = Astro.props;
 ---
 
 <article
@@ -26,7 +28,16 @@ const { plan, class: className = "" } = Astro.props;
     <span class="pill border border-line bg-raised text-muted">{plan.metafora}</span>
   </div>
 
-  <p class="relative text-2xl text-accent">{plan.pregunta}</p>
+  {/* Preguntas acumulativas: las heredadas chicas y en gris, la propia
+      del plan destacada. justify-end alinea las tres tarjetas. */}
+  <div class="relative flex flex-col justify-end gap-0.5 md:min-h-[4.6rem]">
+    {
+      heredadas.length > 0 && (
+        <p class="text-sm text-muted">{heredadas.join(" + ")} +</p>
+      )
+    }
+    <p class="text-2xl text-accent">{plan.pregunta}</p>
+  </div>
   <p class="relative text-sm leading-relaxed text-muted">{plan.resumen}</p>
 
   {/* Cuánto cubre el plan, dicho en el lenguaje de la marca */}

@@ -72,7 +72,7 @@ export const planes: Plan[] = [
     modalidad: "por mes · mínimo 3 meses",
     cobertura: 11,
     resumen:
-      "La información ordenada para tu próxima decisión. La decisión, siempre, es tuya.",
+      "Te acercamos la información ordenada para que tomes tu próxima decisión con respaldo.",
     incluye: ["Todo lo del plan Pro"],
     noIncluye: [],
     exclusivos: [

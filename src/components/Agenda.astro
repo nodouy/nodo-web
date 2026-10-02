@@ -38,7 +38,7 @@ const { conCalendario = false } = Astro.props;
           />
         </div>
         <div class="reveal mt-8 flex flex-col items-center gap-3 md:hidden">
-          <Boton href={site.calendarioCorto} externo brillo>
+          <Boton href={site.calendarioCorto} externo evento="agenda_click">
             {agenda.botonCelular}
           </Boton>
           <Boton href={waLink} externo variante="outline" flecha={false}>
@@ -48,10 +48,10 @@ const { conCalendario = false } = Astro.props;
       </>
     ) : (
       <div class="reveal mt-8 flex flex-wrap justify-center gap-3">
-        <Boton href="/contacto#agenda" brillo>
+        <Boton href="/contacto#agenda" evento="agenda_click">
           {agenda.botonAgenda}
         </Boton>
-        <Boton href={waLink} externo variante="outline" flecha={false} brillo>
+        <Boton href={waLink} externo variante="outline" flecha={false}>
           {agenda.botonWhatsapp}
         </Boton>
       </div>

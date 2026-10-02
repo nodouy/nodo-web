@@ -60,11 +60,21 @@ const desfaseQs = (i: number) =>
           <span class="font-medium text-accent">{portada.bajadaAcento}</span>
         </p>
         <div class="mt-8 flex flex-wrap gap-3">
-          <Boton href="/contacto#agenda" brillo>{portada.ctaAgendar}</Boton>
-          <Boton href={waLink} externo variante="outline" flecha={false} brillo>
+          <Boton href="/formulario" brillo evento="cta_comenzar">
+            {portada.ctaPrincipal}
+          </Boton>
+          <Boton href={waLink} externo variante="outline" flecha={false}>
             {portada.ctaWhatsapp}
           </Boton>
         </div>
+        <a
+          href={ruta("/contacto#agenda")}
+          data-ga="agenda_click"
+          class="enlace-flecha mt-4 flex w-fit items-center gap-1.5 text-sm text-muted underline-offset-4 transition-colors hover:text-accent"
+        >
+          {portada.ctaHablar}
+          <Flecha />
+        </a>
       </div>
 
       <div class="js-hero-laptop mx-auto w-full max-w-md md:max-w-none">
@@ -156,7 +166,15 @@ const desfaseQs = (i: number) =>
       </p>
     </div>
     <div class="mt-9 grid items-stretch gap-4 md:grid-cols-3">
-      {planes.map((plan, i) => <PlanCard plan={plan} class={`reveal reveal-d${i}`} />)}
+      {
+        planes.map((plan, i) => (
+          <PlanCard
+            plan={plan}
+            heredadas={planes.slice(0, i).map((x) => x.pregunta)}
+            class={`reveal reveal-d${i}`}
+          />
+        ))
+      }
     </div>
   </section>
 

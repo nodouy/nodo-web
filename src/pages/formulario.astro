@@ -2,7 +2,10 @@
 import Base from "../layouts/Base.astro";
 import Boton from "../components/Boton.astro";
 import { waLink, mailtoLink, site } from "../data/site";
+import { portada } from "../data/inicio";
 import { ruta } from "../lib/rutas";
+
+const ctaHablar = portada.ctaHablar;
 import {
   encabezado,
   secciones,
@@ -42,6 +45,18 @@ const claseCampo =
 
     <p class="mt-5 text-sm leading-relaxed text-muted">{encabezado.principio}</p>
     <p class="mt-2 text-sm text-muted">{encabezado.notaObligatorias}</p>
+
+    {/* Opción secundaria, de menor peso, para quien prefiere conversar antes */}
+    <a
+      href={ruta("/contacto#agenda")}
+      data-ga="agenda_click"
+      class="enlace-flecha mt-5 flex w-fit items-center gap-1.5 text-sm text-muted underline-offset-4 transition-colors hover:text-accent"
+    >
+      {ctaHablar}
+      <svg class="flecha" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+        <path d="M3 11L11 3M11 3H4.5M11 3V9.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+    </a>
   </section>
 
   <section class="mx-auto max-w-3xl px-5 pb-16 md:pb-24">
@@ -211,7 +226,7 @@ const claseCampo =
           {estados.exitoTexto}
         </p>
         <div class="mt-7 flex flex-wrap justify-center gap-3">
-          <Boton href="/contacto#agenda" brillo>Agendá la reunión</Boton>
+          <Boton href="/contacto#agenda" evento="agenda_click">Agendá la reunión</Boton>
           <Boton href={waLink} externo variante="outline" flecha={false}>
             Escribinos por WhatsApp
           </Boton>
@@ -338,6 +353,11 @@ const claseCampo =
     const resultado = await enviarFormulario(campos);
 
     if (resultado.ok) {
+      // Medición: envío del formulario de inicio completado.
+      const w = window as typeof window & { gtag?: (...args: unknown[]) => void };
+      if (typeof w.gtag === "function") {
+        w.gtag("event", "formulario_enviado", { pagina: location.pathname });
+      }
       const exito = document.querySelector<HTMLElement>(".js-exito");
       form.hidden = true;
       exito?.classList.remove("hidden");

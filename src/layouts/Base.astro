@@ -146,6 +146,21 @@ const { titulo, descripcion = site.descripcion } = Astro.props;
         contadores.forEach((el) => ioContador.observe(el));
       }
 
+      // Medición: los elementos marcados con data-ga disparan su evento
+      // de GA4 al clic (cta_comenzar, agenda_click). El evento
+      // contacto_click vive en el bloque de Analytics del <head> y no
+      // se toca desde acá.
+      document.addEventListener("click", (e) => {
+        const objetivo = (e.target as Element).closest?.("[data-ga]");
+        if (!objetivo) return;
+        const w = window as typeof window & { gtag?: (...args: unknown[]) => void };
+        if (typeof w.gtag === "function") {
+          w.gtag("event", (objetivo as HTMLElement).dataset.ga, {
+            pagina: location.pathname,
+          });
+        }
+      });
+
       // Cambio de tema claro/oscuro.
       document.querySelectorAll(".js-theme").forEach((boton) => {
         boton.addEventListener("click", () => {

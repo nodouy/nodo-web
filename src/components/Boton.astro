@@ -12,8 +12,10 @@ interface Props {
   flecha?: boolean;
   class?: string;
   externo?: boolean;
-  /** Destello periódico: solo para los botones de acción principal. */
+  /** Destello periódico: solo para el botón de acción principal. */
   brillo?: boolean;
+  /** Evento de GA4 que dispara el clic (data-ga, ver Base.astro). */
+  evento?: string;
 }
 
 const {
@@ -23,6 +25,7 @@ const {
   class: className = "",
   externo = false,
   brillo = false,
+  evento,
 } = Astro.props;
 ---
 
@@ -31,6 +34,7 @@ const {
   class={`btn ${variante === "solid" ? "btn-solid" : "btn-outline"} ${
     brillo ? "btn-brillo js-pausable" : ""
   } ${className}`}
+  {...evento ? { "data-ga": evento } : {}}
   {...externo ? { target: "_blank", rel: "noopener" } : {}}
 >
   <slot />

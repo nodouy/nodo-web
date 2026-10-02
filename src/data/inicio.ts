@@ -19,28 +19,36 @@ export const portada = {
   bajada:
     "Ordenamos y analizamos la información que tu negocio ya genera —planillas, facturación, plataformas de venta— para que la veas de forma clara en un solo lugar.",
   bajadaAcento: "Las decisiones de tu negocio las tomás vos.",
-  ctaAgendar: "Agendá una reunión",
+  // Botón principal único de todo el sitio: lleva al formulario de
+  // inicio. Alternativas consideradas: "Empezá ahora" (elegida),
+  // "Empezá hoy", "Dar el primer paso".
+  ctaPrincipal: "Empezá ahora",
   ctaWhatsapp: "Escribinos por WhatsApp",
+  // Opción secundaria, de menor peso, para quien prefiere conversar
+  // antes: lleva al calendario de Contacto.
+  ctaHablar: "Prefiero hablar primero con alguien de NODO",
 };
 
+// Enfoque de oportunidad, no de reproche: quien lee ya tiene un negocio
+// funcionando y sabe de lo suyo. Se le muestra lo que puede ganar.
 export const teSuena = {
-  titulo: "¿Te suena?",
-  bajada: "Tres situaciones que se repiten en casi todos los negocios.",
+  titulo: "Lo que ganás con tus datos ordenados",
+  bajada: "Tres mejoras posibles en casi cualquier negocio.",
   situaciones: [
     {
-      titulo: "Tenés todo repartido en planillas",
+      titulo: "Toda tu información en un solo lugar",
       texto:
-        "Las ventas en un Excel, los gastos en otro, la facturación en el sistema. Nada habla con nada, y armar un resumen completo te lleva horas.",
+        "Ventas, gastos y facturación reunidos en una misma vista. El resumen que hoy lleva horas, listo en minutos.",
     },
     {
-      titulo: "No sabés qué te deja margen",
+      titulo: "Claridad sobre tu margen",
       texto:
-        "Vendés todos los días, pero no está claro qué producto rinde de verdad y cuál apenas cubre sus costos.",
+        "Saber qué productos rinden más, para poner el foco donde más te conviene.",
     },
     {
-      titulo: "Decidís a ojo",
+      titulo: "Tu experiencia, con números al lado",
       texto:
-        "La intuición te trajo hasta acá, y vale. Pero cada vez hay más números en juego, y mirarlos ordenados es otra cosa.",
+        "Conocés tu negocio mejor que nadie. Los datos ordenados suman una mirada más para decidir con seguridad.",
     },
   ],
 };
@@ -67,7 +75,7 @@ export const queHacemos = {
       pregunta: "¿Qué me conviene hacer?",
       metafora: "El copiloto",
       texto:
-        "La información ordenada para tu próxima decisión. La decisión, siempre, es tuya.",
+        "Te acercamos la información ordenada para que tomes tu próxima decisión con respaldo.",
     },
   ],
 };
