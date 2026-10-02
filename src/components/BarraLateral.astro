@@ -1,0 +1,122 @@
+---
+/**
+ * Navegación del reporte: barra lateral fija en escritorio (logo de
+ * puntos + NODO y las cuatro secciones como ícono + etiqueta) y barra
+ * inferior fija en celular con los cuatro íconos.
+ *
+ * El resaltado de la sección activa lleva transition:name, así con las
+ * View Transitions se desliza de una sección a otra al navegar.
+ */
+import DotMark from "./DotMark.astro";
+import { ruta } from "../lib/rutas";
+
+const secciones = [
+  {
+    href: "/",
+    etiqueta: "Inicio",
+    icono: "M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z",
+  },
+  {
+    href: "/servicios",
+    etiqueta: "Servicios y planes",
+    icono: "M5 20V11M12 20V4M19 20v-6",
+  },
+  {
+    href: "/seguridad",
+    etiqueta: "Seguridad",
+    icono: "M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6z",
+  },
+  {
+    href: "/contacto",
+    etiqueta: "Contacto",
+    icono: "M4 5h16v11H9l-5 4z",
+  },
+];
+
+// Ruta actual sin la base del sitio, para marcar la sección activa.
+// El formulario cuenta como parte del recorrido de Inicio.
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const actual =
+  (Astro.url.pathname.slice(base.length) || "/").replace(/\/$/, "") || "/";
+const activa = (href: string) =>
+  href === "/" ? actual === "/" || actual === "/formulario" : actual === href;
+---
+
+{/* Escritorio: barra lateral fija */}
+<aside
+  class="sticky top-0 hidden h-screen w-24 shrink-0 flex-col items-center gap-2 overflow-y-auto border-r border-line px-2 py-7 md:flex"
+  aria-label="Secciones"
+>
+  <a href={ruta("/")} class="flex flex-col items-center gap-2 pb-5 pt-1" aria-label="NODO, ir al inicio">
+    <DotMark class="text-body" />
+    <span class="text-[15px] font-medium tracking-[0.06em]">NODO</span>
+  </a>
+  {
+    secciones.map((s) => (
+      <a
+        href={ruta(s.href)}
+        aria-current={activa(s.href) ? "page" : undefined}
+        class={`relative flex w-full flex-col items-center gap-1.5 rounded-xl px-1 py-3 text-center text-[11px] leading-tight transition-colors ${
+          activa(s.href) ? "text-accent" : "text-muted hover:text-body"
+        }`}
+      >
+        {activa(s.href) && (
+          <span
+            class="absolute inset-0 rounded-xl bg-raised"
+            transition:name="nav-activa"
+            aria-hidden="true"
+          />
+        )}
+        <svg
+          class="relative"
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d={s.icono} />
+        </svg>
+        <span class="relative">{s.etiqueta}</span>
+      </a>
+    ))
+  }
+</aside>
+
+{/* Celular: barra inferior fija */}
+<nav
+  class="fixed inset-x-0 bottom-0 z-50 flex border-t border-line bg-base/95 backdrop-blur-md md:hidden"
+  style="padding-bottom: env(safe-area-inset-bottom)"
+  aria-label="Secciones"
+>
+  {
+    secciones.map((s) => (
+      <a
+        href={ruta(s.href)}
+        aria-current={activa(s.href) ? "page" : undefined}
+        class={`flex min-w-0 flex-1 flex-col items-center gap-1 px-1 py-2.5 text-center text-[10px] leading-tight transition-colors ${
+          activa(s.href) ? "text-accent" : "text-muted"
+        }`}
+      >
+        <svg
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d={s.icono} />
+        </svg>
+        <span class="w-full truncate">{s.etiqueta}</span>
+      </a>
+    ))
+  }
+</nav>

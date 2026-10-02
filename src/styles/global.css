@@ -33,19 +33,31 @@
   --block: #c92c2e; /* solo fondos de bloque y elementos grandes */
   --block-contrast: #ffffff;
   --line: rgb(31 33 36 / 0.15);
+  /* Juego invertido: la tarjeta "oscura" del reporte, que en modo
+     oscuro pasa a clara (píldora 1, plan Full) */
+  --inv-bg: #1f2124;
+  --inv-fg: #faf8f5;
+  --inv-muted: #a6a6a4;
+  --inv-line: rgb(245 243 240 / 0.22);
+  --inv-accent: #ff9d73;
   color-scheme: light;
 }
 
 [data-theme="dark"] {
   --bg: #1f2124;
-  --bg-raised: #26282c;
+  --bg-raised: #2a2c31;
   --fg: #f5f3f0;
   --fg-muted: #a6a6a4;
   --accent: #ff9d73;
   --accent-contrast: #1f2124;
   --block: #c92c2e;
   --block-contrast: #ffffff;
-  --line: rgb(245 243 240 / 0.15);
+  --line: rgb(245 243 240 / 0.16);
+  --inv-bg: #f5f3f0;
+  --inv-fg: #1f2124;
+  --inv-muted: #63656a;
+  --inv-line: rgb(31 33 36 / 0.2);
+  --inv-accent: #c92c2e;
   color-scheme: dark;
 }
 
@@ -59,6 +71,11 @@
   --color-block: var(--block);
   --color-block-contrast: var(--block-contrast);
   --color-line: var(--line);
+  --color-inv: var(--inv-bg);
+  --color-inv-contra: var(--inv-fg);
+  --color-inv-muted: var(--inv-muted);
+  --color-inv-line: var(--inv-line);
+  --color-inv-accent: var(--inv-accent);
 }
 
 /* ------------------------------------------------------------------ */
@@ -130,6 +147,12 @@ h4 {
 .btn-solid {
   background: var(--accent);
   color: var(--accent-contrast);
+}
+
+/* CTA del reporte: rojo de bloque en los dos modos, como la referencia */
+.btn-rojo {
+  background: var(--block);
+  color: var(--block-contrast);
 }
 
 .btn-outline {
@@ -405,14 +428,102 @@ input[type="checkbox"] {
 
 /* ------------------------------------------------------------------ */
 /* Lectura de gráfico (canvas, ver grafico.ts): la línea de tendencia  */
-/* que el cursor va "leyendo", como fondo fijo de todo el sitio.       */
-/* Los bloques marcados con .atenua-grafico la atenúan al pasar.       */
+/* que el cursor va "leyendo", como fondo del bloque principal del     */
+/* Inicio. El texto del bloque va encima, con posición propia.         */
 /* ------------------------------------------------------------------ */
 .js-grafico {
-  position: fixed;
+  position: absolute;
   inset: 0;
-  z-index: -1;
   pointer-events: none;
+}
+
+/* ------------------------------------------------------------------ */
+/* Lenguaje de reporte: iconos de tema, barras del gráfico de Inicio   */
+/* y barras de avance de los pasos.                                    */
+/* ------------------------------------------------------------------ */
+.icono-sol {
+  display: block;
+}
+.icono-luna {
+  display: none;
+}
+[data-theme="light"] .icono-sol {
+  display: none;
+}
+[data-theme="light"] .icono-luna {
+  display: block;
+}
+
+/* Barras del bloque "Ventas por mes": el color sale del tema
+   (oscuras en claro, claras en oscuro) y mayo va en rojo. */
+.rep-bar {
+  flex: 1 1 0;
+  min-width: 0;
+  background: var(--fg);
+}
+
+.rep-bar--hot {
+  background: var(--block);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html.js .rep-barras .rep-bar {
+    transform: scaleY(0);
+    transform-origin: bottom;
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  html.js .rep-barras .rep-bar:nth-child(2) { transition-delay: 0.08s; }
+  html.js .rep-barras .rep-bar:nth-child(3) { transition-delay: 0.16s; }
+  html.js .rep-barras .rep-bar:nth-child(4) { transition-delay: 0.24s; }
+  html.js .rep-barras .rep-bar:nth-child(5) { transition-delay: 0.32s; }
+  html.js .rep-barras .rep-bar:nth-child(6) { transition-delay: 0.4s; }
+
+  html.js .is-visible .rep-barras .rep-bar {
+    transform: scaleY(1);
+  }
+
+  html.js .rep-barras .rep-bar--hot {
+    background: var(--fg);
+  }
+
+  html.js .is-visible .rep-barras .rep-bar--hot {
+    animation: rep-rojo 0.4s ease 0.75s both;
+  }
+}
+
+@keyframes rep-rojo {
+  from {
+    background-color: var(--fg);
+  }
+  to {
+    background-color: var(--block);
+  }
+}
+
+/* Barras de avance de las fichas de "¿Cómo funciona?" */
+.avance {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--line);
+}
+
+.avance > div {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--accent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html.js .avance > div {
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1) var(--d, 0ms);
+  }
+
+  html.js .is-visible .avance > div {
+    transform: scaleX(1);
+  }
 }
 
 /* ------------------------------------------------------------------ */

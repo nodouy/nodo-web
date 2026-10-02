@@ -8,6 +8,7 @@ import { intro, canales, formulario, ubicacion } from "../data/contacto";
 
 <Base
   titulo="Contacto — NODO"
+  seccion="Contacto"
   descripcion="Escribinos por WhatsApp o correo, o agendá una reunión informativa sin compromiso."
 >
   <section class="mx-auto max-w-6xl px-5 pb-8 pt-14 md:pt-20">
@@ -173,9 +174,16 @@ import { intro, canales, formulario, ubicacion } from "../data/contacto";
 <script>
   import { enviarFormulario } from "../scripts/envio";
 
-  const form = document.querySelector<HTMLFormElement>(".js-form-contacto");
+  // Compatible con View Transitions: se vincula en cada carga de página.
+  document.addEventListener("astro:page-load", iniciarFormularioContacto);
 
-  form?.addEventListener("submit", async (evento) => {
+  function iniciarFormularioContacto() {
+
+  const form = document.querySelector<HTMLFormElement>(".js-form-contacto");
+  if (!form || form.dataset.listo === "1") return;
+  form.dataset.listo = "1";
+
+  form.addEventListener("submit", async (evento) => {
     evento.preventDefault();
 
     // Anti-spam: si el campo trampa está marcado, no se envía nada.
@@ -246,4 +254,5 @@ import { intro, canales, formulario, ubicacion } from "../data/contacto";
       errorEnvio?.classList.remove("hidden");
     }
   });
+  }
 </script>

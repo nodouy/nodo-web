@@ -1,269 +1,245 @@
 /**
- * Lectura de gráfico, fondo fijo de todo el sitio: una línea de
- * tendencia que sube de izquierda a derecha y ondula lentamente, y que
- * el cursor va "leyendo" — guías punteadas, punto sobre la curva, el
- * tramo recorrido en el color de acento con un relleno tenue debajo, y
- * el resto en gris suave sobre una grilla apenas visible.
+ * Lectura de gráfico: la línea de tendencia que el cursor va "leyendo",
+ * como fondo del bloque principal del Inicio (no de todo el sitio).
  *
- * - Canvas a pantalla completa (fixed, detrás del contenido), montado
- *   en Base.astro: está en todas las páginas. La fase de la onda se
- *   guarda al salir de cada página, así la curva no se reinicia al
- *   navegar.
- * - El scroll la mantiene viva: cambia la fase de la onda, así no se ve
- *   siempre el mismo tramo.
+ * - El canvas vive dentro del bloque (.js-grafico, absolute inset-0);
+ *   el texto del bloque va encima con posición propia.
  * - El punto sigue al mouse con suavizado; sin mouse (celular) avanza
- *   solo y acompaña el scroll.
- * - Colores desde las variables CSS del tema (--fg, --accent, --bg):
- *   al cambiar de modo el canvas se actualiza al instante. El aro del
- *   punto usa el color de fondo del tema, como recorte.
- * - Los bloques con la clase .atenua-grafico (texto largo sin tarjeta)
- *   bajan la opacidad de todo el dibujo mientras están a la vista.
+ *   solo. El scroll le cambia la fase a la onda.
+ * - Colores desde las variables CSS del tema, con actualización
+ *   instantánea al cambiar data-theme.
  * - prefers-reduced-motion: línea estática, sin lectura.
- * - ~30 cuadros por segundo; pausa total con la pestaña oculta.
+ * - ~30 cuadros por segundo; pausa con la pestaña oculta o el bloque
+ *   fuera de pantalla.
+ * - Compatible con View Transitions: se monta en astro:page-load y se
+ *   desarma en astro:before-swap.
  */
 
-const canvas = document.querySelector<HTMLCanvasElement>(".js-grafico");
 const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const conMouse = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 
-if (canvas) {
-  const ctx = canvas.getContext("2d");
-  if (ctx) {
-    let W = 0;
-    let H = 0;
+let limpiar: (() => void) | null = null;
 
-    // Colores del tema, leídos de las variables CSS como "r,g,b"
-    let fg = "31,33,36";
-    let acc = "201,44,46";
-    let bg = "250,248,245";
-    const C = (rgb: string, o: number) => `rgba(${rgb},${o})`;
+function montar() {
+  limpiar?.();
+  limpiar = null;
 
-    function hexARgb(hex: string, previo: string): string {
-      const h = hex.trim().replace("#", "");
-      if (h.length === 3) {
-        return h
-          .split("")
-          .map((c) => parseInt(c + c, 16))
-          .join(",");
-      }
-      if (h.length === 6) {
-        return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16)).join(",");
-      }
-      return previo;
-    }
+  const canvas = document.querySelector<HTMLCanvasElement>(".js-grafico");
+  const ctx = canvas?.getContext("2d");
+  const bloque = canvas?.parentElement;
+  if (!canvas || !ctx || !bloque) return;
 
-    function leerColores() {
-      const estilos = getComputedStyle(document.documentElement);
-      fg = hexARgb(estilos.getPropertyValue("--fg"), fg);
-      acc = hexARgb(estilos.getPropertyValue("--accent"), acc);
-      bg = hexARgb(estilos.getPropertyValue("--bg"), bg);
-    }
+  let W = 0;
+  let H = 0;
+  let izquierda = 0;
 
-    function medir() {
-      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-      W = window.innerWidth;
-      H = window.innerHeight;
-      canvas!.width = Math.round(W * dpr);
-      canvas!.height = Math.round(H * dpr);
-      ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
-    }
+  let fg = "31,33,36";
+  let acc = "201,44,46";
+  let bg = "255,255,255";
+  const C = (rgb: string, o: number) => `rgba(${rgb},${o})`;
 
-    // Bloques de texto largo que atenúan el dibujo mientras se ven
-    const bloques = [...document.querySelectorAll(".atenua-grafico")];
-    let dim = 1;
+  function hexARgb(hex: string, previo: string): string {
+    const h = hex.trim().replace("#", "");
+    if (h.length === 3)
+      return h
+        .split("")
+        .map((c) => parseInt(c + c, 16))
+        .join(",");
+    if (h.length === 6)
+      return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16)).join(",");
+    return previo;
+  }
 
-    const m = { x: -1, sx: 0, conCursor: false };
-    // La fase continúa entre páginas: el tiempo arranca donde quedó
-    let t = 0;
-    const t0 = (() => {
-      try {
-        return parseFloat(sessionStorage.getItem("nodo-grafico-t") ?? "0") || 0;
-      } catch {
-        return 0;
-      }
-    })();
+  function leerColores() {
+    const estilos = getComputedStyle(document.documentElement);
+    fg = hexARgb(estilos.getPropertyValue("--fg"), fg);
+    acc = hexARgb(estilos.getPropertyValue("--accent"), acc);
+    bg = hexARgb(estilos.getPropertyValue("--bg-raised"), bg);
+  }
 
-    // La curva: sube de izquierda a derecha por la franja inferior del
-    // viewport. El scroll le cambia la fase para que siga viva. En
-    // pantallas angostas sube y ondula menos.
-    const angosto = () => W < 768;
-    const f = (x: number) => {
-      const fase = window.scrollY * 0.003;
-      return (
-        H * (angosto() ? 0.86 : 0.82) -
-        x * ((H * (angosto() ? 0.16 : 0.36)) / Math.max(W, 1)) -
-        (angosto() ? 28 : 46) * Math.sin(x / 120 + t * 0.25 + fase) -
-        (angosto() ? 13 : 22) * Math.sin(x / 47 + 1.3 - t * 0.4 + fase * 1.7)
-      );
-    };
+  function medir() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    const r = bloque!.getBoundingClientRect();
+    W = Math.round(r.width);
+    H = Math.round(r.height);
+    izquierda = r.left;
+    canvas!.width = Math.round(W * dpr);
+    canvas!.height = Math.round(H * dpr);
+    ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
 
-    function dibujar() {
-      ctx!.clearRect(0, 0, W, H);
+  const m = { x: -1, sx: 0, conCursor: false };
+  let t = 0;
 
-      // atenuación suave si hay un bloque de texto largo a la vista
-      let objetivoDim = 1;
-      for (const b of bloques) {
-        const r = b.getBoundingClientRect();
-        if (r.height > 0 && r.bottom > H * 0.35 && r.top < H) {
-          objetivoDim = 0.4;
-          break;
-        }
-      }
-      dim += (objetivoDim - dim) * 0.08;
+  // La curva recorre la franja inferior del bloque, subiendo a la
+  // derecha; las amplitudes escalan con el alto del bloque.
+  const f = (x: number) => {
+    const fase = window.scrollY * 0.003;
+    const a1 = Math.min(H * 0.1, 34);
+    const a2 = Math.min(H * 0.05, 16);
+    return (
+      H * 0.82 -
+      x * ((H * 0.3) / Math.max(W, 1)) -
+      a1 * Math.sin(x / 110 + t * 0.25 + fase) -
+      a2 * Math.sin(x / 47 + 1.3 - t * 0.4 + fase * 1.7)
+    );
+  };
 
-      // grilla horizontal apenas visible
-      ctx!.lineWidth = 1;
-      ctx!.strokeStyle = C(fg, 0.07 * dim);
-      for (let i = 1; i < 6; i++) {
-        ctx!.beginPath();
-        ctx!.moveTo(0, (i * H) / 6);
-        ctx!.lineTo(W, (i * H) / 6);
-        ctx!.stroke();
-      }
+  function dibujar() {
+    ctx!.clearRect(0, 0, W, H);
 
-      // línea completa en gris suave (clara en modo oscuro)
-      ctx!.strokeStyle = C(fg, 0.22 * dim);
-      ctx!.lineWidth = 1.5;
+    // grilla horizontal apenas visible
+    ctx!.lineWidth = 1;
+    ctx!.strokeStyle = C(fg, 0.06);
+    for (let i = 1; i < 6; i++) {
       ctx!.beginPath();
-      ctx!.moveTo(0, f(0));
-      for (let x = 6; x <= W; x += 6) ctx!.lineTo(x, f(x));
+      ctx!.moveTo(0, (i * H) / 6);
+      ctx!.lineTo(W, (i * H) / 6);
       ctx!.stroke();
-
-      if (reduce) return; // línea estática: sin lectura ni guías
-
-      // objetivo: el mouse, o un avance automático que acompaña el scroll
-      const objetivo =
-        conMouse && m.conCursor
-          ? m.x
-          : (((t * W) / 16 + window.scrollY * 0.6) % (W + 120)) - 60;
-      m.sx += (objetivo - m.sx) * 0.08;
-      const mx = Math.max(0, Math.min(W, m.sx));
-      const my = f(mx);
-
-      // relleno tenue bajo el tramo recorrido
-      ctx!.beginPath();
-      ctx!.moveTo(0, H);
-      for (let x = 0; x <= mx; x += 6) ctx!.lineTo(x, f(x));
-      ctx!.lineTo(mx, my);
-      ctx!.lineTo(mx, H);
-      ctx!.closePath();
-      ctx!.fillStyle = C(acc, 0.05 * dim);
-      ctx!.fill();
-
-      // el tramo recorrido, en el color de acento del tema
-      ctx!.strokeStyle = C(acc, 0.75 * dim);
-      ctx!.lineWidth = 2;
-      ctx!.beginPath();
-      ctx!.moveTo(0, f(0));
-      for (let x = 6; x <= mx; x += 6) ctx!.lineTo(x, f(x));
-      ctx!.lineTo(mx, my);
-      ctx!.stroke();
-
-      // guías punteadas que siguen la lectura
-      ctx!.setLineDash([4, 4]);
-      ctx!.lineWidth = 1;
-      ctx!.strokeStyle = C(fg, 0.16 * dim);
-      ctx!.beginPath();
-      ctx!.moveTo(mx, 0);
-      ctx!.lineTo(mx, H);
-      ctx!.moveTo(0, my);
-      ctx!.lineTo(W, my);
-      ctx!.stroke();
-      ctx!.setLineDash([]);
-
-      // el punto: aro del color de fondo (recorte) y centro en acento
-      const visDim = Math.max(dim, 0.55);
-      ctx!.beginPath();
-      ctx!.fillStyle = C(bg, 1);
-      ctx!.arc(mx, my, 9, 0, 6.2832);
-      ctx!.fill();
-      ctx!.beginPath();
-      ctx!.fillStyle = C(acc, 0.95 * visDim);
-      ctx!.arc(mx, my, 4.5, 0, 6.2832);
-      ctx!.fill();
     }
 
-    // Bucle a ~30 cuadros por segundo
-    let rafId = 0;
-    let previo = 0;
-    function cuadro(ms: number) {
+    // línea completa en gris suave
+    ctx!.strokeStyle = C(fg, 0.2);
+    ctx!.lineWidth = 1.5;
+    ctx!.beginPath();
+    ctx!.moveTo(0, f(0));
+    for (let x = 6; x <= W; x += 6) ctx!.lineTo(x, f(x));
+    ctx!.stroke();
+
+    if (reduce) return;
+
+    const objetivo =
+      conMouse && m.conCursor
+        ? m.x
+        : (((t * W) / 14 + window.scrollY * 0.4) % (W + 120)) - 60;
+    m.sx += (objetivo - m.sx) * 0.08;
+    const mx = Math.max(0, Math.min(W, m.sx));
+    const my = f(mx);
+
+    // relleno tenue bajo el tramo recorrido
+    ctx!.beginPath();
+    ctx!.moveTo(0, H);
+    for (let x = 0; x <= mx; x += 6) ctx!.lineTo(x, f(x));
+    ctx!.lineTo(mx, my);
+    ctx!.lineTo(mx, H);
+    ctx!.closePath();
+    ctx!.fillStyle = C(acc, 0.05);
+    ctx!.fill();
+
+    // el tramo recorrido, en el acento del tema
+    ctx!.strokeStyle = C(acc, 0.65);
+    ctx!.lineWidth = 2;
+    ctx!.beginPath();
+    ctx!.moveTo(0, f(0));
+    for (let x = 6; x <= mx; x += 6) ctx!.lineTo(x, f(x));
+    ctx!.lineTo(mx, my);
+    ctx!.stroke();
+
+    // guías punteadas
+    ctx!.setLineDash([4, 4]);
+    ctx!.lineWidth = 1;
+    ctx!.strokeStyle = C(fg, 0.14);
+    ctx!.beginPath();
+    ctx!.moveTo(mx, 0);
+    ctx!.lineTo(mx, H);
+    ctx!.moveTo(0, my);
+    ctx!.lineTo(W, my);
+    ctx!.stroke();
+    ctx!.setLineDash([]);
+
+    // el punto: aro del color del bloque (recorte) y centro en acento
+    ctx!.beginPath();
+    ctx!.fillStyle = C(bg, 1);
+    ctx!.arc(mx, my, 9, 0, 6.2832);
+    ctx!.fill();
+    ctx!.beginPath();
+    ctx!.fillStyle = C(acc, 0.95);
+    ctx!.arc(mx, my, 4.5, 0, 6.2832);
+    ctx!.fill();
+  }
+
+  let rafId = 0;
+  let previo = 0;
+  let enPantalla = true;
+  function cuadro(ms: number) {
+    rafId = requestAnimationFrame(cuadro);
+    if (ms - previo < 33) return;
+    previo = ms;
+    t = ms / 1000;
+    dibujar();
+  }
+  function arrancar() {
+    if (!rafId && !reduce && enPantalla && !document.hidden)
       rafId = requestAnimationFrame(cuadro);
-      if (ms - previo < 33) return;
-      previo = ms;
-      t = t0 + ms / 1000;
-      dibujar();
-    }
-    function arrancar() {
-      if (!rafId && !reduce && !document.hidden)
-        rafId = requestAnimationFrame(cuadro);
-    }
-    function frenar() {
-      cancelAnimationFrame(rafId);
-      rafId = 0;
-    }
+  }
+  function frenar() {
+    cancelAnimationFrame(rafId);
+    rafId = 0;
+  }
 
-    leerColores();
-    medir();
-    if (reduce) {
-      dibujar();
-    } else {
-      arrancar();
-    }
+  const ac = new AbortController();
+  const op = { signal: ac.signal } as AddEventListenerOptions;
 
-    // gancho mínimo de verificación en desarrollo
-    (window as unknown as Record<string, unknown>).__grafico = {
-      estado: () => ({
-        rafId,
-        W,
-        H,
-        fg,
-        acc,
-        bg,
-        dim,
-        reduce,
-        hidden: document.hidden,
-      }),
-      dibujar,
-    };
+  leerColores();
+  medir();
+  if (reduce) dibujar();
+  else arrancar();
 
-    window.addEventListener("resize", () => {
+  window.addEventListener(
+    "resize",
+    () => {
       medir();
       if (reduce) dibujar();
-    });
+    },
+    op,
+  );
 
-    // pausa total con la pestaña oculta
-    document.addEventListener("visibilitychange", () => {
+  document.addEventListener(
+    "visibilitychange",
+    () => {
       if (document.hidden) frenar();
       else arrancar();
-    });
+    },
+    op,
+  );
 
-    // la fase sigue en la próxima página
-    window.addEventListener("pagehide", () => {
-      try {
-        sessionStorage.setItem("nodo-grafico-t", String(t));
-      } catch {
-        /* sin almacenamiento, la curva arranca de cero */
-      }
-    });
-
-    if (conMouse && !reduce) {
-      window.addEventListener(
-        "pointermove",
-        (e) => {
-          m.x = e.clientX;
-          m.conCursor = true;
-        },
-        { passive: true },
-      );
-    }
-
-    // el canvas sigue el modo claro/oscuro al instante
-    new MutationObserver(() => {
-      leerColores();
-      if (reduce) dibujar();
-    }).observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["data-theme"],
-    });
+  if (conMouse && !reduce) {
+    window.addEventListener(
+      "pointermove",
+      (e) => {
+        m.x = e.clientX - izquierda;
+        m.conCursor = true;
+      },
+      { passive: true, signal: ac.signal },
+    );
   }
+
+  const io = new IntersectionObserver((entradas) => {
+    enPantalla = entradas[0]?.isIntersecting ?? true;
+    if (enPantalla) arrancar();
+    else frenar();
+  });
+  io.observe(bloque);
+
+  const mo = new MutationObserver(() => {
+    leerColores();
+    if (reduce) dibujar();
+  });
+  mo.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["data-theme"],
+  });
+
+  limpiar = () => {
+    ac.abort();
+    io.disconnect();
+    mo.disconnect();
+    frenar();
+  };
 }
+
+document.addEventListener("astro:page-load", montar);
+document.addEventListener("astro:before-swap", () => {
+  limpiar?.();
+  limpiar = null;
+});

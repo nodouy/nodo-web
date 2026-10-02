@@ -1,272 +1,276 @@
 ---
 import Base from "../layouts/Base.astro";
-import Boton from "../components/Boton.astro";
 import Flecha from "../components/Flecha.astro";
-import Laptop from "../components/Laptop.astro";
-import PanelHero from "../components/PanelHero.astro";
-import PlanCard from "../components/PlanCard.astro";
-import Acordeon from "../components/Acordeon.astro";
-import Agenda from "../components/Agenda.astro";
-import CtaFinal from "../components/CtaFinal.astro";
-import { site, waLink } from "../data/site";
+import { waLink } from "../data/site";
 import {
   portada,
   teSuena,
-  queHacemos,
   comoFunciona,
-  seguridadCorta,
-  quienesSomos,
-  dudas,
-  muestra,
+  graficoInicio,
+  indicadores,
+  bloqueFormulario,
 } from "../data/inicio";
-import { planes } from "../data/planes";
+import { planes, etiquetaExclusivos } from "../data/planes";
 import { ruta } from "../lib/rutas";
 
-// Grilla de "Quiénes somos": 8×5 puntos, los que importan en rojo,
-// agrupados abajo a la derecha como en el gráfico de la referencia.
-const rojosQs = new Set([29, 30, 31, 36, 37, 38, 39]);
-const puntosQs = Array.from({ length: 40 }, (_, i) => rojosQs.has(i));
-
-// Cascada diagonal desde arriba a la izquierda: el desfase crece con
-// fila + columna. Los claros entran primero; los rojos, todos después
-// del último claro, como remate. --d es el desfase de entrada; --rd el
-// de la respiración.
-const colsQs = 8;
-const diagQs = (i: number) => Math.floor(i / colsQs) + (i % colsQs);
-const maxDiagClaros = Math.max(
-  ...puntosQs.map((rojo, i) => (rojo ? 0 : diagQs(i))),
-);
-const desfaseQs = (i: number) =>
-  puntosQs[i] ? (maxDiagClaros + 3 + diagQs(i)) * 55 : diagQs(i) * 55;
+const altoMax = Math.max(...graficoInicio.barras.map((b) => b.alto));
 ---
 
-<Base titulo="NODO — Análisis de datos para pymes y emprendimientos de Uruguay">
-  {/* 1. Portada */}
-  <section class="js-hero relative">
-    <div
-      class="relative mx-auto grid max-w-6xl items-center gap-10 px-5 pb-14 pt-14 md:grid-cols-2 md:gap-12 md:pb-24 md:pt-20"
+<Base
+  titulo="NODO — Análisis de datos para pymes y emprendimientos de Uruguay"
+  seccion="Inicio"
+  etiqueta={portada.etiqueta}
+>
+  {/* 1-2. Bloque principal + un solo gráfico */}
+  <div class="flex flex-wrap gap-5">
+    <section
+      class="reveal relative flex min-w-0 flex-[2_1_520px] flex-col items-start gap-5 overflow-hidden rounded-lg bg-raised p-7 md:p-9"
     >
-      <div>
-        <span class="pill whitespace-normal! border border-line text-muted">{portada.etiqueta}</span>
-        <h1 class="mt-5 text-5xl leading-[1.05] tracking-tight md:text-6xl">
-          {portada.titulo}
-          <span class="text-accent">{portada.tituloAcento}</span>
-        </h1>
-        <p class="mt-5 max-w-md text-lg text-muted">
-          {portada.bajada}
-          <span class="font-medium text-accent">{portada.bajadaAcento}</span>
-        </p>
-        <div class="mt-8 flex flex-wrap gap-3">
-          <Boton href="/formulario" brillo evento="cta_comenzar">
-            {portada.ctaPrincipal}
-          </Boton>
-          <Boton href={waLink} externo variante="outline" flecha={false}>
-            {portada.ctaWhatsapp}
-          </Boton>
-        </div>
+      {/* La lectura de gráfico vive acá, detrás del texto del bloque */}
+      <canvas class="js-grafico" aria-hidden="true"></canvas>
+      <p class="relative text-sm text-muted">{portada.rotulo}</p>
+      <h2
+        class="relative text-5xl font-medium leading-none tracking-tight md:text-[68px]"
+      >
+        {portada.titulo}
+        <span class="text-accent">{portada.tituloAcento}</span>
+      </h2>
+      <p class="relative max-w-[560px] text-lg leading-relaxed text-muted md:text-[19px] md:leading-[31px]">
+        {portada.bajada}
+        <span class="font-medium text-accent">{portada.bajadaAcento}</span>
+      </p>
+      <div class="relative flex flex-wrap gap-3">
         <a
-          href={ruta("/contacto#agenda")}
-          data-ga="agenda_click"
-          class="enlace-flecha mt-4 flex w-fit items-center gap-1.5 text-sm text-muted underline-offset-4 transition-colors hover:text-accent"
+          href={ruta("/formulario")}
+          data-ga="cta_comenzar"
+          class="btn btn-rojo btn-brillo js-pausable h-[52px] px-7! text-[17px]"
         >
-          {portada.ctaHablar}
+          {portada.ctaPrincipal}
           <Flecha />
         </a>
+        <a
+          href={waLink}
+          target="_blank"
+          rel="noopener"
+          class="btn btn-outline h-[52px] bg-base px-7! text-[17px]"
+        >
+          {portada.ctaWhatsapp}
+        </a>
       </div>
+      <a
+        href={ruta("/contacto#agenda")}
+        data-ga="agenda_click"
+        class="enlace-flecha relative flex min-h-11 items-center gap-1.5 text-[15px] text-muted transition-colors hover:text-accent"
+      >
+        {portada.ctaHablar}
+        <Flecha />
+      </a>
+    </section>
 
-      <div class="js-hero-laptop mx-auto w-full max-w-md md:max-w-none">
-        <Laptop>
-          <PanelHero />
-        </Laptop>
+    <section
+      class="reveal reveal-d1 flex min-h-[400px] min-w-0 flex-[1_1_300px] flex-col overflow-hidden rounded-lg bg-raised"
+    >
+      <div class="flex flex-col items-start gap-3.5 p-6 pb-0">
+        <h2 class="text-sm">{graficoInicio.titulo}</h2>
+        <p class="flex items-baseline gap-2">
+          <span class="panel-num text-4xl font-medium leading-none md:text-[44px]">
+            <span class="js-contador" data-valor={graficoInicio.valor}>{graficoInicio.valor}</span>
+          </span>
+          <span class="text-sm text-muted">{graficoInicio.sufijo}</span>
+        </p>
+        <span class="pill bg-body text-xs" style="color: var(--bg)">
+          Ejemplo con datos ficticios
+        </span>
       </div>
-    </div>
-  </section>
-
-  {/* 2. ¿Te suena? */}
-  <section class="mx-auto max-w-6xl px-5 py-16 md:py-24">
-    <div class="reveal max-w-xl">
-      <h2 class="text-3xl md:text-4xl">{teSuena.titulo}</h2>
-      <p class="mt-3 text-muted">{teSuena.bajada}</p>
-    </div>
-    <div class="mt-9 grid gap-4 md:grid-cols-3">
-      {
-        teSuena.situaciones.map((s, i) => (
-          <article class={`card-i reveal reveal-d${i} rounded-3xl border border-line bg-raised p-6`}>
-            <span class="panel-num text-sm text-accent">0{i + 1}</span>
-            <h3 class="mt-2 text-xl">{s.titulo}</h3>
-            <p class="mt-2.5 text-sm leading-relaxed text-muted">{s.texto}</p>
-          </article>
-        ))
-      }
-    </div>
-  </section>
-
-  {/* 3. Qué hacemos: las tres preguntas */}
-  <section class="mx-auto max-w-6xl px-5 py-16 md:py-24">
-    <div class="reveal flex max-w-2xl flex-col gap-3">
-      <h2 class="text-3xl md:text-4xl">{queHacemos.titulo}</h2>
-      <p class="text-muted">{queHacemos.bajada}</p>
-    </div>
-    <ol class="mt-9 grid gap-4 md:grid-cols-3">
-      {
-        queHacemos.pasos.map((p, i) => (
-          <li class={`reveal reveal-d${i} flex flex-col gap-2.5 rounded-3xl border border-line bg-raised p-6`}>
-            <span class="pill w-fit border border-line text-muted">{p.metafora}</span>
-            <h3 class="text-2xl text-accent">{p.pregunta}</h3>
-            <p class="text-sm leading-relaxed text-muted">{p.texto}</p>
-          </li>
-        ))
-      }
-    </ol>
-    <a href={ruta("/servicios")} class="enlace-flecha reveal mt-7 flex w-fit items-center gap-1.5 text-accent">
-      {queHacemos.enlace}
-      <Flecha />
-    </a>
-  </section>
-
-  {/* 4. Cómo funciona */}
-  <section class="mx-auto max-w-6xl px-5 py-16 md:py-24">
-    <div class="reveal max-w-xl">
-      <h2 class="text-3xl md:text-4xl">{comoFunciona.titulo}</h2>
-      <p class="mt-3 text-muted">{comoFunciona.bajada}</p>
-    </div>
-    <ol class="mt-9 flex flex-col gap-0">
-      {
-        comoFunciona.pasos.map((p, i) => (
-          <li class="reveal flex gap-5 border-b border-line py-5 last:border-b-0 md:gap-8">
-            <span class="panel-num pt-0.5 text-sm text-accent">0{i + 1}</span>
-            <div>
-              <h3 class="text-lg">{p.titulo}</h3>
-              <p class="mt-1 max-w-xl text-sm leading-relaxed text-muted">{p.texto}</p>
-              {"enlace" in p && p.enlace && (
-                <a
-                  href={ruta(p.enlace.href)}
-                  class="enlace-flecha mt-2 flex w-fit items-center gap-1.5 text-sm text-accent"
-                >
-                  {p.enlace.texto}
-                  <Flecha />
-                </a>
-              )}
+      <div class="rep-barras mt-auto flex items-end gap-[3px] pt-5">
+        {
+          graficoInicio.barras.map((b) => (
+            <div
+              class={`rep-bar flex items-end justify-center pb-3 text-[13px] ${b.hot ? "rep-bar--hot" : ""}`}
+              style={`height:${Math.round((b.alto / altoMax) * 215)}px`}
+            >
+              <span class={b.hot ? "text-white" : "text-inv-muted"}>{b.mes}</span>
             </div>
-          </li>
-        ))
-      }
-    </ol>
-  </section>
-
-  {/* 5. Nuestros planes */}
-  <section class="mx-auto max-w-6xl px-5 py-16 md:py-24">
-    <div class="reveal max-w-xl">
-      <h2 class="text-3xl md:text-4xl">Nuestros planes</h2>
-      <p class="mt-3 text-muted">
-        Tres formas de trabajar, según la pregunta que quieras responder.
-      </p>
-    </div>
-    <div class="mt-9 grid items-stretch gap-4 md:grid-cols-3">
-      {
-        planes.map((plan, i) => (
-          <PlanCard
-            plan={plan}
-            heredadas={planes.slice(0, i).map((x) => x.pregunta)}
-            class={`reveal reveal-d${i}`}
-          />
-        ))
-      }
-    </div>
-  </section>
-
-  {
-    /* Sección de muestra: maquetada pero oculta hasta que exista el
-       reporte demo de Power BI (site.flags.mostrarMuestra). */
-    site.flags.mostrarMuestra && (
-      <section id="muestra" class="mx-auto max-w-6xl px-5 py-16 md:py-24">
-        <div class="reveal max-w-xl">
-          <h2 class="text-3xl md:text-4xl">{muestra.titulo}</h2>
-          <p class="mt-3 text-muted">{muestra.bajada}</p>
-        </div>
-        <div class="reveal mx-auto mt-9 max-w-2xl">
-          <Laptop>
-            <PanelHero />
-          </Laptop>
-        </div>
-        {muestra.enlace && (
-          <div class="reveal mt-7 text-center">
-            <Boton href={muestra.enlace} externo>
-              Abrir el reporte de muestra
-            </Boton>
-          </div>
-        )}
-      </section>
-    )
-  }
-
-  {/* 6. Seguridad y confidencialidad, versión corta */}
-  <section class="mx-auto max-w-6xl px-5 py-16 md:py-24">
-    <div class="reveal max-w-xl">
-      <h2 class="text-3xl md:text-4xl">{seguridadCorta.titulo}</h2>
-      <p class="mt-3 text-muted">{seguridadCorta.bajada}</p>
-    </div>
-    <div class="mt-9 grid gap-4 md:grid-cols-3">
-      {
-        seguridadCorta.puntos.map((p, i) => (
-          <article class={`reveal reveal-d${i} rounded-3xl border border-line bg-raised p-6`}>
-            <h3 class="text-lg">{p.titulo}</h3>
-            <p class="mt-2 text-sm leading-relaxed text-muted">{p.texto}</p>
-          </article>
-        ))
-      }
-    </div>
-    <a href={ruta("/seguridad")} class="enlace-flecha reveal mt-7 flex w-fit items-center gap-1.5 text-accent">
-      {seguridadCorta.enlace}
-      <Flecha />
-    </a>
-  </section>
-
-  {/* 7. Quiénes somos: el texto acompañado de la grilla de puntos en
-      escala media, la marca dibujada como gráfico */}
-  <section class="mx-auto max-w-6xl px-5 py-16 md:py-24">
-    <div class="grid items-center gap-12 md:grid-cols-2">
-      <div class="atenua-grafico reveal max-w-2xl">
-        <h2 class="text-3xl md:text-4xl">{quienesSomos.titulo}</h2>
-        {
-          quienesSomos.parrafos.map((p) => (
-            <p class="mt-4 leading-relaxed text-muted">{p}</p>
           ))
         }
       </div>
-      <div class="qs-grafica js-pausable mx-auto" aria-hidden="true">
-        {
-          puntosQs.map((rojo, i) => (
+    </section>
+  </div>
+
+  {/* 3. Indicadores en píldora */}
+  <div class="flex flex-wrap gap-5">
+    {
+      indicadores.map((k, i) => (
+        <a
+          href={ruta(k.href)}
+          aria-label={k.aria}
+          class={`card-i reveal reveal-d${i} flex min-w-0 flex-[1_1_300px] items-center justify-between gap-4 rounded-[80px] py-6 pl-10 pr-7 ${
+            k.oscuro ? "bg-inv text-inv-contra" : "bg-raised"
+          }`}
+        >
+          <span class="flex min-w-0 flex-col gap-1">
+            <span class="text-sm">{k.etiqueta}</span>
+            <span class="panel-num text-3xl font-medium leading-[1.05] md:text-[38px]">
+              {k.contadores.length === 2 ? (
+                <>
+                  <span class="js-contador" data-valor={k.contadores[0]}>{k.contadores[0]}</span>
+                  {" a "}
+                  <span class="js-contador" data-valor={k.contadores[1]}>{k.contadores[1]}</span>
+                </>
+              ) : k.contadores.length === 1 ? (
+                <>
+                  <span class="js-contador" data-valor={k.contadores[0]}>{k.contadores[0]}</span>
+                  {" USD"}
+                </>
+              ) : (
+                k.valor
+              )}
+            </span>
+            <span class={`text-sm ${k.oscuro ? "text-inv-muted" : "text-muted"}`}>
+              {k.sub}
+            </span>
+          </span>
+          <span
+            class={`flex size-12 shrink-0 items-center justify-center rounded-full ${
+              k.oscuro ? "bg-inv-contra text-inv" : "bg-body"
+            }`}
+            style={k.oscuro ? undefined : "color: var(--bg)"}
+            aria-hidden="true"
+          >
+            <Flecha />
+          </span>
+        </a>
+      ))
+    }
+  </div>
+
+  {/* 4. Nuestros planes */}
+  <h2 class="mt-5 text-2xl font-medium md:text-3xl">
+    Nuestros planes <span class="text-lg font-normal text-muted md:text-xl">/3</span>
+  </h2>
+  <div class="flex flex-wrap gap-5">
+    {/* Bloque rojo del formulario, con la escalera coral */}
+    <section
+      class="card-i reveal relative flex min-h-[440px] min-w-0 flex-[1_1_280px] flex-col gap-3 overflow-hidden rounded-lg bg-block p-7 text-block-contrast"
+    >
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 200 200"
+        preserveAspectRatio="none"
+        class="absolute bottom-0 right-0 h-[58%] w-[62%]"
+      >
+        <polygon
+          points="0,200 0,150 50,150 50,100 100,100 100,50 150,50 150,0 200,0 200,200"
+          fill="#FF9D73"></polygon>
+      </svg>
+      <h3 class="relative text-[26px] font-medium leading-[30px]">
+        {bloqueFormulario.titulo}
+      </h3>
+      <p class="relative text-base leading-6">{bloqueFormulario.texto}</p>
+      <a
+        href={ruta("/formulario")}
+        data-ga="cta_comenzar"
+        class="relative mt-auto flex h-14 items-center justify-between rounded-full bg-white px-6 text-ink"
+      >
+        {bloqueFormulario.boton}
+        <Flecha />
+      </a>
+    </section>
+
+    {/* Tarjetas de plan con preguntas acumuladas; el Full, invertido */}
+    {
+      planes.map((plan, i) => {
+        const inv = Boolean(plan.destacado);
+        const heredadas = planes.slice(0, i).map((x) => x.pregunta);
+        return (
+          <section
+            class={`card-i reveal reveal-d${i} flex min-w-0 flex-[1_1_260px] flex-col items-start gap-3.5 rounded-lg p-7 ${
+              inv ? "bg-inv text-inv-contra" : "bg-raised"
+            }`}
+          >
             <span
-              class={`qs-dot ${rojo ? "qs-dot--rojo" : ""}`}
-              style={`--d:${desfaseQs(i)}ms; --rd:${(-(i % 6) * 1.17).toFixed(2)}s`}
-            />
-          ))
-        }
-      </div>
-    </div>
-  </section>
+              class={`pill ${
+                plan.id === "pro"
+                  ? "bg-block text-block-contrast"
+                  : inv
+                    ? "bg-inv-contra text-inv"
+                    : "bg-body"
+              }`}
+              style={plan.id === "standard" ? "color: var(--bg)" : undefined}
+            >
+              {plan.metafora}
+            </span>
+            <h3 class="text-[26px] font-medium leading-8">{plan.nombre}</h3>
+            <div class="flex flex-col gap-1">
+              {heredadas.map((q) => (
+                <p class={`text-base ${inv ? "text-inv-muted" : "text-muted"}`}>{q}</p>
+              ))}
+              <p class={`text-2xl leading-tight ${inv ? "text-inv-accent" : "text-accent"}`}>
+                {plan.pregunta}
+              </p>
+            </div>
+            <p class={`text-base leading-relaxed ${inv ? "text-inv-muted" : "text-muted"}`}>
+              {plan.resumen}
+            </p>
+            {plan.exclusivos && (
+              <div class="flex flex-col gap-1.5 text-[15px]">
+                <p class={`text-xs uppercase tracking-[0.08em] ${inv ? "text-inv-accent" : "text-accent"}`}>
+                  {etiquetaExclusivos}
+                </p>
+                {plan.exclusivos.map((e) => (
+                  <p>{e.titulo}</p>
+                ))}
+              </div>
+            )}
+            <p
+              class={`mt-auto flex w-full flex-wrap items-baseline gap-x-2.5 gap-y-1 border-t pt-4 ${
+                inv ? "border-inv-line" : "border-line"
+              }`}
+            >
+              <span class="panel-num text-[32px] font-medium">{plan.precio}</span>
+              <span class={`text-[15px] ${inv ? "text-inv-muted" : "text-muted"}`}>
+                {plan.modalidad}
+              </span>
+            </p>
+          </section>
+        );
+      })
+    }
+  </div>
 
-  {/* 8. Dudas */}
-  <section class="mx-auto max-w-3xl px-5 py-16 md:py-24">
-    <div class="reveal">
-      <h2 class="text-3xl md:text-4xl">{dudas.titulo}</h2>
-      <p class="mt-3 text-muted">{dudas.bajada}</p>
-    </div>
-    <div class="reveal mt-8">
-      <Acordeon items={dudas.preguntas} />
-    </div>
-  </section>
+  {/* 5. ¿Cómo funciona? */}
+  <h2 id="como-funciona" class="mt-5 scroll-mt-6 text-2xl font-medium md:text-3xl">
+    {comoFunciona.titulo}
+    <span class="text-lg font-normal text-muted md:text-xl">{comoFunciona.contador}</span>
+  </h2>
+  <div class="flex flex-wrap gap-5">
+    {
+      comoFunciona.pasos.map((p, i) => (
+        <section class={`reveal reveal-d${i % 4} flex min-w-0 flex-[1_1_200px] flex-col gap-3 rounded-lg bg-raised p-6`}>
+          <div class="avance" aria-hidden="true">
+            <div style={`width:${(i + 1) * 20}%; --d:${i * 120}ms`} />
+          </div>
+          <p class="panel-num text-[40px] font-medium leading-none">0{i + 1}</p>
+          <h3 class="text-lg font-medium leading-6">{p.titulo}</h3>
+          <p class="text-[15px] leading-[23px] text-muted">{p.texto}</p>
+        </section>
+      ))
+    }
+  </div>
 
-  {/* 9. Agendá una reunión */}
-  <Agenda />
-
-  <CtaFinal
-    titulo="Tus números ya están. Falta mirarlos bien."
-    bajada="Una reunión corta y sin compromiso alcanza para saber si esto es para tu negocio."
-  />
+  {/* 6. Lo que ganás con tus datos ordenados */}
+  <h2 class="mt-5 text-2xl font-medium md:text-3xl">
+    {teSuena.titulo} <span class="text-lg font-normal text-muted md:text-xl">/3</span>
+  </h2>
+  <div class="flex flex-wrap gap-5">
+    {
+      teSuena.situaciones.map((s, i) => (
+        <section class={`card-i reveal reveal-d${i} flex min-w-0 flex-[1_1_300px] flex-col gap-2.5 rounded-lg bg-raised p-7`}>
+          <p class="panel-num text-sm text-accent">0{i + 1}</p>
+          <h3 class="text-[22px] font-medium leading-7">{s.titulo}</h3>
+          <p class="text-base leading-relaxed text-muted">{s.texto}</p>
+        </section>
+      ))
+    }
+  </div>
 </Base>
-
-<script>
-  import "../scripts/hero";
-</script>

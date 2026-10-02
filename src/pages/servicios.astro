@@ -29,11 +29,12 @@ const bloquePowerBi = site.flags.accesoEnLinea ? sinPowerBiOnline : sinPowerBi;
 
 <Base
   titulo="Servicios y planes — NODO"
+  seccion="Servicios y planes"
   descripcion="Tres planes que responden tres preguntas: qué pasó, cómo vengo y qué me conviene hacer. Reportes claros a partir de los datos que ya tenés."
 >
   {/* Introducción: el problema y la solución */}
   <section class="mx-auto max-w-6xl px-5 pb-8 pt-14 md:pt-20">
-    <div class="atenua-grafico reveal">
+    <div class="reveal">
       <span class="pill border border-line text-muted">{intro.etiqueta}</span>
       <h1 class="mt-5 max-w-2xl text-4xl leading-[1.1] tracking-tight md:text-5xl">
         {intro.titulo}
@@ -208,7 +209,7 @@ const bloquePowerBi = site.flags.accesoEnLinea ? sinPowerBiOnline : sinPowerBi;
 
   {/* Qué necesitamos para arrancar */}
   <section class="mx-auto max-w-6xl px-5 py-12 md:py-16">
-    <div class="atenua-grafico reveal max-w-2xl">
+    <div class="reveal max-w-2xl">
       <h2 class="text-3xl md:text-4xl">{arranque.titulo}</h2>
       {
         arranque.parrafos.map((p) => (
@@ -225,7 +226,7 @@ const bloquePowerBi = site.flags.accesoEnLinea ? sinPowerBiOnline : sinPowerBi;
 
   {/* ¿Con qué formatos trabajamos? — contesta la objeción "¿pueden
       trabajar con lo que yo tengo?"; por eso va acá y no en Seguridad */}
-  <section class="atenua-grafico mx-auto max-w-6xl px-5 py-12 md:py-16">
+  <section class="mx-auto max-w-6xl px-5 py-12 md:py-16">
     <div class="reveal max-w-2xl">
       <h2 class="text-3xl md:text-4xl">{formatos.titulo}</h2>
       <p class="mt-4 leading-relaxed text-muted">{formatos.intro}</p>

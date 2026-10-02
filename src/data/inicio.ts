@@ -17,8 +17,10 @@ export const portada = {
   // La bajada también se corta en dos: el cierre va destacado con
   // peso medium y color de acento (nunca negrita).
   bajada:
-    "Ordenamos y analizamos la información que tu negocio ya genera —planillas, facturación, plataformas de venta— para que la veas de forma clara en un solo lugar.",
+    "Ordenamos y analizamos la información que tu negocio ya genera, como planillas, facturación y plataformas de venta, para que la veas de forma clara en un solo lugar.",
   bajadaAcento: "Las decisiones de tu negocio las tomás vos.",
+  // Rótulo del bloque principal en el diseño de reporte.
+  rotulo: "Resumen",
   // Botón principal único de todo el sitio: lleva al formulario de
   // inicio. Alternativas consideradas: "Empezá ahora" (elegida),
   // "Empezá hoy", "Dar el primer paso".
@@ -80,25 +82,26 @@ export const queHacemos = {
   ],
 };
 
+// Fichas del reporte: textos cortos de la referencia. El plazo de la
+// primera entrega vive en el indicador "Primera entrega", con su
+// condición y alcance.
 export const comoFunciona = {
   titulo: "¿Cómo funciona?",
-  bajada: "Un proceso con método, del primer mensaje a la entrega.",
+  contador: "/5 pasos",
   pasos: [
     {
       titulo: "Primer contacto",
-      texto:
-        "Nos escribís por WhatsApp o agendás una reunión. Sin compromiso: no hace falta que prepares documentos ni que tengas nada ordenado, alcanza con lo que ya sabés de tu negocio.",
+      texto: "Nos escribís por WhatsApp o agendás una reunión. Sin compromiso.",
     },
     {
       titulo: "Formulario de inicio",
       texto:
-        "Lo completás desde el sitio cuando quieras, sin esperar respuesta nuestra. No te compromete a nada: nos sirve para conocer tu negocio antes de la reunión.",
-      enlace: { texto: "Completar el formulario de inicio", href: "/formulario" },
+        "Lo completás desde el sitio cuando quieras, sin esperar respuesta nuestra.",
     },
     {
       titulo: "Reunión informativa",
       texto:
-        "Conversamos sobre lo que necesitás y vemos qué plan tiene sentido para tu caso. Si ninguno lo tiene, también te lo decimos.",
+        "Conversamos sobre lo que necesitás y vemos qué plan tiene sentido para tu caso.",
     },
     {
       titulo: "Acuerdo de confidencialidad",
@@ -107,10 +110,64 @@ export const comoFunciona = {
     },
     {
       titulo: "Entrega",
-      texto:
-        "Recibís tu reporte y lo recorremos con vos. La primera entrega del plan Standard lleva de 5 a 7 días hábiles, según el volumen de datos; en Pro y Full ese es el plazo de la entrega inicial, y después el reporte se actualiza todos los meses.",
+      texto: "Recibís tu reporte y lo recorremos con vos.",
     },
   ],
+};
+
+// Bloque de gráfico del Inicio: un solo gráfico (barras), con datos
+// ficticios declarados como tales.
+export const graficoInicio = {
+  titulo: "Ventas por mes",
+  valor: 52,
+  sufijo: "/ promedio 6 meses",
+  barras: [
+    { mes: "Ene", alto: 150 },
+    { mes: "Feb", alto: 96 },
+    { mes: "Mar", alto: 150 },
+    { mes: "Abr", alto: 118 },
+    { mes: "May", alto: 215, hot: true },
+    { mes: "Jun", alto: 150 },
+  ],
+};
+
+// Indicadores en forma de píldora. El primero va en tarjeta invertida.
+export const indicadores = [
+  {
+    etiqueta: "Primera entrega",
+    valor: "5 a 7",
+    contadores: [5, 7],
+    sub: "/ días hábiles · plan Standard",
+    href: "/#como-funciona",
+    aria: "Ver cómo funciona",
+    oscuro: true,
+  },
+  {
+    etiqueta: "Planes desde",
+    valor: "150 USD",
+    contadores: [150],
+    sub: "/ pago único · plan Standard",
+    href: "/servicios",
+    aria: "Ver los planes",
+    oscuro: false,
+  },
+  {
+    etiqueta: "Confidencialidad",
+    valor: "Acuerdo mutuo",
+    contadores: [],
+    sub: "/ firmado antes de ver un solo dato",
+    href: "/seguridad",
+    aria: "Ver seguridad y confidencialidad",
+    oscuro: false,
+  },
+];
+
+// Bloque rojo del formulario, junto a las tarjetas de plan.
+export const bloqueFormulario = {
+  titulo: "Formulario de inicio",
+  texto:
+    "Lo completás desde el sitio cuando quieras. No te compromete a nada: nos sirve para conocer tu negocio antes de la reunión.",
+  boton: "Empezá ahora",
 };
 
 export const seguridadCorta = {
