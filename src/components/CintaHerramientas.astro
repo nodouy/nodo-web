@@ -1,0 +1,129 @@
+---
+/**
+ * Cinta de herramientas: una fila de marcas en movimiento continuo
+ * hacia la izquierda, dentro de un bloque del reporte.
+ *
+ * - La fila está duplicada para que el bucle reinicie sin saltos.
+ * - En gris; al pasar el mouse, cada marca toma su color (--marca).
+ * - Se pausa al pasar el mouse por encima y cuando sale de pantalla
+ *   (.js-pausable); con prefers-reduced-motion queda estática.
+ * - Bordes con desvanecido hacia el fondo (mask del contenedor).
+ *
+ * NOTA: los íconos son dibujos propios de línea, a una misma altura.
+ * Si se consiguen los SVG oficiales con su licencia, se reemplazan acá
+ * mismo, ítem por ítem.
+ */
+
+interface Herramienta {
+  nombre: string;
+  marca: string; // color al pasar el mouse
+  icono: "barras" | "grilla" | "doc" | "recibo" | "biblioteca" | "flujo" | "cilindro";
+  sello?: string; // texto corto dentro del documento (CSV, XML, {})
+}
+
+const herramientas: Herramienta[] = [
+  { nombre: "Power BI", marca: "#F2C811", icono: "barras" },
+  { nombre: "Excel", marca: "#217346", icono: "grilla" },
+  { nombre: "CSV", marca: "#C92C2E", icono: "doc", sello: "CSV" },
+  { nombre: "Google Sheets", marca: "#188038", icono: "grilla" },
+  { nombre: "Sistemas de facturación", marca: "#C92C2E", icono: "recibo" },
+  { nombre: "SharePoint", marca: "#038387", icono: "biblioteca" },
+  { nombre: "Power Automate", marca: "#0066FF", icono: "flujo" },
+  { nombre: "XML", marca: "#C92C2E", icono: "doc", sello: "XML" },
+  { nombre: "JSON", marca: "#C92C2E", icono: "doc", sello: "{ }" },
+  { nombre: "Bases de datos", marca: "#C92C2E", icono: "cilindro" },
+];
+---
+
+<section class="reveal rounded-lg bg-raised p-6 md:p-7">
+  <h2 class="text-2xl font-medium md:text-3xl">Herramientas con las que trabajamos</h2>
+
+  <div class="cinta js-pausable mt-5" role="list" aria-label="Herramientas con las que trabajamos">
+    <div class="cinta-pista">
+      {
+        [0, 1].map((copia) => (
+          <div class="flex items-center gap-14" aria-hidden={copia === 1 ? "true" : undefined}>
+            {herramientas.map((h) => (
+              <span
+                class="cinta-item"
+                role={copia === 0 ? "listitem" : undefined}
+                style={`--marca:${h.marca}`}
+              >
+                <svg
+                  width="28"
+                  height="28"
+                  viewBox="0 0 28 28"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.7"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  role="img"
+                  aria-label={h.nombre}
+                >
+                  {h.icono === "barras" && (
+                    <>
+                      <path d="M5 23V12" />
+                      <path d="M11.5 23V5" />
+                      <path d="M18 23v-7" />
+                      <path d="M24.5 23V9" />
+                    </>
+                  )}
+                  {h.icono === "grilla" && (
+                    <>
+                      <rect x="4" y="5" width="20" height="18" rx="2" />
+                      <path d="M4 11h20M4 17h20M11 5v18" />
+                    </>
+                  )}
+                  {h.icono === "doc" && (
+                    <>
+                      <path d="M7 3h9l5 5v17H7z" />
+                      <path d="M16 3v5h5" />
+                      <text
+                        x="14"
+                        y="20"
+                        text-anchor="middle"
+                        font-size="7"
+                        font-weight="500"
+                        stroke="none"
+                        fill="currentColor"
+                      >
+                        {h.sello}
+                      </text>
+                    </>
+                  )}
+                  {h.icono === "recibo" && (
+                    <>
+                      <path d="M7 3h14v22l-2.5-2-2.3 2-2.2-2-2.2 2-2.3-2L7 25z" />
+                      <path d="M11 9h6M11 13h6M11 17h4" />
+                    </>
+                  )}
+                  {h.icono === "biblioteca" && (
+                    <>
+                      <path d="M4 5h5v18H4zM11.5 5h5v18h-5z" />
+                      <path d="m19 6 5 1-3.5 17-5-1z" />
+                    </>
+                  )}
+                  {h.icono === "flujo" && (
+                    <>
+                      <path d="M5 9h13M18 9l-3.5-3.5M18 9l-3.5 3.5" />
+                      <path d="M23 19H10M10 19l3.5-3.5M10 19l3.5 3.5" />
+                    </>
+                  )}
+                  {h.icono === "cilindro" && (
+                    <>
+                      <ellipse cx="14" cy="6.5" rx="9" ry="3.5" />
+                      <path d="M5 6.5v15c0 1.9 4 3.5 9 3.5s9-1.6 9-3.5v-15" />
+                      <path d="M5 14c0 1.9 4 3.5 9 3.5s9-1.6 9-3.5" />
+                    </>
+                  )}
+                </svg>
+                <span class="text-sm font-medium">{h.nombre}</span>
+              </span>
+            ))}
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>

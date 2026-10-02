@@ -38,7 +38,7 @@ const { plan, heredadas = [], class: className = "" } = Astro.props;
     }
     <p class="text-2xl text-accent">{plan.pregunta}</p>
   </div>
-  <p class="relative text-sm leading-relaxed text-muted">{plan.resumen}</p>
+  <p class="relative text-sm leading-relaxed text-muted md:text-[14px]">{plan.resumen}</p>
 
   {/* Cuánto cubre el plan, dicho en el lenguaje de la marca */}
   <MiniGrilla rojos={plan.cobertura} class="relative" />

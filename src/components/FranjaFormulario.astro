@@ -1,0 +1,40 @@
+---
+/**
+ * El bloque rojo del formulario como franja horizontal a todo el ancho:
+ * título y texto a la izquierda, botón blanco a la derecha y la
+ * escalera coral al fondo a la derecha. De alto contenido (~160px en
+ * escritorio), para no competir con la tarjeta Full de los planes.
+ */
+import Flecha from "./Flecha.astro";
+import { bloqueFormulario } from "../data/inicio";
+import { ruta } from "../lib/rutas";
+---
+
+<section class="card-i reveal relative overflow-hidden rounded-lg bg-block p-6 text-block-contrast">
+  <svg
+    aria-hidden="true"
+    viewBox="0 0 200 200"
+    preserveAspectRatio="none"
+    class="absolute bottom-0 right-0 h-full w-[26%] opacity-90 md:w-[18%]"
+  >
+    <polygon
+      points="0,200 0,150 50,150 50,100 100,100 100,50 150,50 150,0 200,0 200,200"
+      fill="#FF9D73"></polygon>
+  </svg>
+  <div class="relative flex flex-wrap items-center justify-between gap-4 md:pr-[16%]">
+    <div class="min-w-0 max-w-prose">
+      <h3 class="text-[22px] font-medium leading-7 md:text-[18px] md:leading-6">
+        {bloqueFormulario.titulo}
+      </h3>
+      <p class="mt-1.5 text-[15px] leading-6 md:text-[14px]">{bloqueFormulario.texto}</p>
+    </div>
+    <a
+      href={ruta("/formulario")}
+      data-ga="cta_comenzar"
+      class="btn btn-brillo btn-brillo-tinta js-pausable h-11 shrink-0 bg-white px-5! py-0! text-[15px] text-ink md:text-[14px]"
+    >
+      {bloqueFormulario.boton}
+      <Flecha />
+    </a>
+  </div>
+</section>

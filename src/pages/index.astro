@@ -1,6 +1,7 @@
 ---
 import Base from "../layouts/Base.astro";
 import Flecha from "../components/Flecha.astro";
+import FranjaFormulario from "../components/FranjaFormulario.astro";
 import { waLink } from "../data/site";
 import {
   portada,
@@ -8,7 +9,6 @@ import {
   comoFunciona,
   graficoInicio,
   indicadores,
-  bloqueFormulario,
 } from "../data/inicio";
 import { planes, etiquetaExclusivos } from "../data/planes";
 import { ruta } from "../lib/rutas";
@@ -28,12 +28,12 @@ const altoMax = Math.max(...graficoInicio.barras.map((b) => b.alto));
     >
       <p class="relative text-sm text-muted">{portada.rotulo}</p>
       <h2
-        class="relative text-5xl font-medium leading-none tracking-tight md:text-[68px]"
+        class="relative text-5xl font-medium leading-none tracking-tight md:text-[54px]"
       >
         {portada.titulo}
         <span class="text-accent">{portada.tituloAcento}</span>
       </h2>
-      <p class="relative max-w-[560px] text-lg leading-relaxed text-muted md:text-[19px] md:leading-[31px]">
+      <p class="relative max-w-[560px] text-lg leading-relaxed text-muted md:text-[16px] md:leading-[26px]">
         {portada.bajada}
         <span class="font-medium text-accent">{portada.bajadaAcento}</span>
       </p>
@@ -66,12 +66,12 @@ const altoMax = Math.max(...graficoInicio.barras.map((b) => b.alto));
     </section>
 
     <section
-      class="reveal reveal-d1 flex min-h-[400px] min-w-0 flex-[1_1_300px] flex-col overflow-hidden rounded-lg bg-raised"
+      class="reveal reveal-d1 flex min-h-[25rem] min-w-0 flex-[1_1_300px] flex-col overflow-hidden rounded-lg bg-raised"
     >
       <div class="flex flex-col items-start gap-3.5 p-6 pb-0">
         <h2 class="text-sm">{graficoInicio.titulo}</h2>
         <p class="flex items-baseline gap-2">
-          <span class="panel-num text-4xl font-medium leading-none md:text-[44px]">
+          <span class="panel-num text-4xl font-medium leading-none md:text-[35px]">
             <span class="js-contador" data-valor={graficoInicio.valor}>{graficoInicio.valor}</span>
           </span>
           <span class="text-sm text-muted">{graficoInicio.sufijo}</span>
@@ -85,7 +85,7 @@ const altoMax = Math.max(...graficoInicio.barras.map((b) => b.alto));
           graficoInicio.barras.map((b) => (
             <div
               class={`rep-bar flex items-end justify-center pb-3 text-[13px] ${b.hot ? "rep-bar--hot" : ""}`}
-              style={`height:${Math.round((b.alto / altoMax) * 215)}px`}
+              style={`height:${(Math.round((b.alto / altoMax) * 215) / 16).toFixed(2)}rem`}
             >
               <span class={b.hot ? "text-white" : "text-inv-muted"}>{b.mes}</span>
             </div>
@@ -108,7 +108,7 @@ const altoMax = Math.max(...graficoInicio.barras.map((b) => b.alto));
         >
           <span class="flex min-w-0 flex-col gap-0.5">
             <span class="text-[13px]">{k.etiqueta}</span>
-            <span class="panel-num text-[28px] font-medium leading-[1.05]">
+            <span class="panel-num text-[28px] font-medium leading-[1.05] md:text-[22px]">
               {k.contadores.length === 2 ? (
                 <>
                   <span class="js-contador" data-valor={k.contadores[0]}>{k.contadores[0]}</span>
@@ -147,35 +147,8 @@ const altoMax = Math.max(...graficoInicio.barras.map((b) => b.alto));
     Nuestros planes <span class="text-lg font-normal text-muted md:text-xl">/3</span>
   </h2>
   <div class="flex flex-wrap gap-5">
-    {/* Bloque rojo del formulario, con la escalera coral */}
-    <section
-      class="card-i reveal relative flex min-w-0 flex-[1_1_280px] flex-col gap-3 overflow-hidden rounded-lg bg-block p-6 text-block-contrast"
-    >
-      <svg
-        aria-hidden="true"
-        viewBox="0 0 200 200"
-        preserveAspectRatio="none"
-        class="absolute bottom-0 right-0 h-[42%] w-[46%]"
-      >
-        <polygon
-          points="0,200 0,150 50,150 50,100 100,100 100,50 150,50 150,0 200,0 200,200"
-          fill="#FF9D73"></polygon>
-      </svg>
-      <h3 class="relative text-[22px] font-medium leading-7">
-        {bloqueFormulario.titulo}
-      </h3>
-      <p class="relative text-[15px] leading-6">{bloqueFormulario.texto}</p>
-      <a
-        href={ruta("/formulario")}
-        data-ga="cta_comenzar"
-        class="relative mt-auto flex h-12 items-center justify-between gap-3 rounded-full bg-white px-5 pt-0 text-[15px] text-ink"
-      >
-        {bloqueFormulario.boton}
-        <Flecha />
-      </a>
-    </section>
-
-    {/* Tarjetas de plan con preguntas acumuladas; el Full, invertido */}
+    {/* Tarjetas de plan con preguntas acumuladas; el Full, invertido,
+        es la que destaca: el bloque rojo del formulario vive más abajo */}
     {
       planes.map((plan, i) => {
         const inv = Boolean(plan.destacado);
@@ -198,16 +171,16 @@ const altoMax = Math.max(...graficoInicio.barras.map((b) => b.alto));
             >
               {plan.metafora}
             </span>
-            <h3 class="text-[22px] font-medium leading-7">{plan.nombre}</h3>
+            <h3 class="text-[22px] font-medium leading-7 md:text-[18px] md:leading-6">{plan.nombre}</h3>
             <div class="flex flex-col gap-1">
               {heredadas.map((q) => (
                 <p class={`text-[15px] ${inv ? "text-inv-muted" : "text-muted"}`}>{q}</p>
               ))}
-              <p class={`text-[20px] leading-tight ${inv ? "text-inv-accent" : "text-accent"}`}>
+              <p class={`text-[20px] leading-tight md:text-[16px] ${inv ? "text-inv-accent" : "text-accent"}`}>
                 {plan.pregunta}
               </p>
             </div>
-            <p class={`text-[15px] leading-relaxed ${inv ? "text-inv-muted" : "text-muted"}`}>
+            <p class={`text-[15px] leading-relaxed md:text-[14px] ${inv ? "text-inv-muted" : "text-muted"}`}>
               {plan.resumen}
             </p>
             {plan.exclusivos && (
@@ -225,7 +198,7 @@ const altoMax = Math.max(...graficoInicio.barras.map((b) => b.alto));
                 inv ? "border-inv-line" : "border-line"
               }`}
             >
-              <span class="panel-num text-[26px] font-medium">{plan.precio}</span>
+              <span class="panel-num text-[26px] font-medium md:text-[21px]">{plan.precio}</span>
               <span class={`text-sm ${inv ? "text-inv-muted" : "text-muted"}`}>
                 {plan.modalidad}
               </span>
@@ -251,15 +224,18 @@ const altoMax = Math.max(...graficoInicio.barras.map((b) => b.alto));
           <div class="avance" aria-hidden="true">
             <div style={`width:${(i + 1) * 20}%; --d:${i * 120}ms; --bd:${i * 0.9}s`} />
           </div>
-          <p class="paso-num panel-num text-[40px] font-medium leading-none transition-colors">
+          <p class="paso-num panel-num text-[40px] font-medium leading-none transition-colors md:text-[32px]">
             0{i + 1}
           </p>
           <h3 class="text-lg font-medium leading-6">{p.titulo}</h3>
-          <p class="text-[15px] leading-[23px] text-muted">{p.texto}</p>
+          <p class="text-[15px] leading-[23px] text-muted md:text-[14px] md:leading-[21px]">{p.texto}</p>
         </section>
       ))
     }
   </div>
+
+  {/* Franja del formulario de inicio, debajo de ¿Cómo funciona? */}
+  <FranjaFormulario />
 
   {/* 6. Lo que ganás con tus datos ordenados */}
   <h2 class="mt-5 text-2xl font-medium md:text-3xl">
@@ -270,7 +246,7 @@ const altoMax = Math.max(...graficoInicio.barras.map((b) => b.alto));
       teSuena.situaciones.map((s, i) => (
         <section class={`card-i reveal reveal-d${i} flex min-w-0 flex-[1_1_300px] flex-col gap-2.5 rounded-lg bg-raised p-7`}>
           <p class="panel-num text-sm text-accent">0{i + 1}</p>
-          <h3 class="text-[22px] font-medium leading-7">{s.titulo}</h3>
+          <h3 class="text-[22px] font-medium leading-7 md:text-[18px] md:leading-6">{s.titulo}</h3>
           <p class="text-base leading-relaxed text-muted">{s.texto}</p>
         </section>
       ))

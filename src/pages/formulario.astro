@@ -25,24 +25,24 @@ const claseCampo =
 >
   <section class="reveal rounded-lg bg-raised p-6 md:p-7">
     <p class="text-sm text-muted">{encabezado.etiqueta}</p>
-    <h2 class="mt-3 max-w-3xl text-3xl font-medium leading-tight tracking-tight md:text-4xl">
+    <h2 class="mt-3 max-w-prose text-3xl font-medium leading-tight tracking-tight md:text-4xl">
       {encabezado.titulo}
     </h2>
     <p class="mt-3 text-xl text-accent">{encabezado.eslogan}</p>
-    <p class="mt-4 max-w-3xl leading-relaxed text-muted">{encabezado.bajada}</p>
+    <p class="mt-4 max-w-prose leading-relaxed text-muted">{encabezado.bajada}</p>
 
     <div class="mt-6 flex flex-wrap gap-5">
       {
         encabezado.puntos.map((p) => (
           <article class="min-w-0 flex-[1_1_240px] rounded-lg border border-line bg-base p-5">
             <h3 class="text-sm font-medium">{p.titulo}</h3>
-            <p class="mt-2 text-sm leading-relaxed text-muted">{p.texto}</p>
+            <p class="mt-2 text-sm leading-relaxed text-muted md:text-[14px]">{p.texto}</p>
           </article>
         ))
       }
     </div>
 
-    <p class="mt-5 max-w-3xl text-sm leading-relaxed text-muted">{encabezado.principio}</p>
+    <p class="mt-5 max-w-prose text-sm leading-relaxed text-muted md:text-[14px]">{encabezado.principio}</p>
     <p class="mt-2 text-sm text-muted">{encabezado.notaObligatorias}</p>
 
     {/* Opción secundaria, de menor peso, para quien prefiere conversar antes */}
@@ -208,7 +208,7 @@ const claseCampo =
         </button>
 
         {/* Nota de privacidad */}
-        <p class="text-sm leading-relaxed text-muted">
+        <p class="text-sm leading-relaxed text-muted md:text-[14px]">
           {notaPrivacidad.texto}{" "}
           <a href={ruta(notaPrivacidad.enlaceHref)} class="text-accent underline">
             {notaPrivacidad.enlaceTexto}

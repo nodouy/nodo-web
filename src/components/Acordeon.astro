@@ -36,11 +36,11 @@ import { rutasEnHtml } from "../lib/rutas";
         </summary>
         {item.respuestaHtml ? (
           <p
-            class="acordeon-texto px-5 pb-5 text-sm leading-relaxed text-muted [&_a]:text-accent [&_a]:underline"
+            class="acordeon-texto px-5 pb-5 text-sm leading-relaxed text-muted md:text-[14px] [&_a]:text-accent [&_a]:underline"
             set:html={rutasEnHtml(item.respuestaHtml)}
           />
         ) : (
-          <p class="acordeon-texto px-5 pb-5 text-sm leading-relaxed text-muted">
+          <p class="acordeon-texto px-5 pb-5 text-sm leading-relaxed text-muted md:text-[14px]">
             {item.respuesta}
           </p>
         )}
