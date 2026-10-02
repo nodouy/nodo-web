@@ -60,8 +60,8 @@ const { titulo, descripcion = site.descripcion } = Astro.props;
     </script>
   </head>
   <body class="flex min-h-screen flex-col">
-    {/* Fondo de puntos animado de todo el sitio (ver fondo.ts) */}
-    <canvas class="js-fondo" aria-hidden="true"></canvas>
+    {/* Halo que acompaña al mouse (ver fondo.ts) */}
+    <div class="js-halo" aria-hidden="true"></div>
     <Header />
     <main class="flex-1">
       <slot />

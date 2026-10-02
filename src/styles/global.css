@@ -33,6 +33,7 @@
   --block: #c92c2e; /* solo fondos de bloque y elementos grandes */
   --block-contrast: #ffffff;
   --line: rgb(31 33 36 / 0.15);
+  --halo: rgb(201 44 46 / 0.09);
   color-scheme: light;
 }
 
@@ -46,6 +47,7 @@
   --block: #c92c2e;
   --block-contrast: #ffffff;
   --line: rgb(245 243 240 / 0.15);
+  --halo: rgb(255 157 115 / 0.08);
   color-scheme: dark;
 }
 
@@ -404,14 +406,55 @@ input[type="checkbox"] {
 }
 
 /* ------------------------------------------------------------------ */
-/* Fondo de puntos animado de todo el sitio (canvas, ver fondo.ts).    */
-/* Va detrás del contenido y nunca captura el mouse.                   */
+/* Halo que acompaña al mouse (ver fondo.ts): una luz suave en el      */
+/* color de acento que persigue al cursor por detrás del contenido y   */
+/* respira cuando el mouse se detiene. Solo en dispositivos con        */
+/* puntero fino; con prefers-reduced-motion no existe.                 */
 /* ------------------------------------------------------------------ */
-.js-fondo {
+.js-halo {
   position: fixed;
-  inset: 0;
+  left: 0;
+  top: 0;
+  width: 34rem;
+  height: 34rem;
   z-index: -1;
   pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  will-change: transform;
+}
+
+.js-halo::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: radial-gradient(closest-side, var(--halo), transparent 72%);
+}
+
+.js-halo.activo {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Respiración al quedar quieto: escala leve, ciclo largo */
+  .js-halo::before {
+    animation: halo-respira 5.5s ease-in-out infinite;
+  }
+
+  .js-halo.quieto::before {
+    animation-play-state: paused;
+  }
+}
+
+@keyframes halo-respira {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.12);
+  }
 }
 
 /* ------------------------------------------------------------------ */
