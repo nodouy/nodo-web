@@ -26,7 +26,7 @@ const altoMax = Math.max(...graficoInicio.barras.map((b) => b.alto));
     <section
       class="reveal relative flex min-w-0 flex-[2_1_520px] flex-col items-start gap-5 rounded-lg bg-raised p-7 md:p-9"
     >
-      <p class="relative text-sm text-muted">{portada.rotulo}</p>
+      <p class="relative text-sm text-muted">{portada.etiqueta}</p>
       <h2
         class="relative text-5xl font-medium leading-none tracking-tight md:text-[54px]"
       >
@@ -41,7 +41,7 @@ const altoMax = Math.max(...graficoInicio.barras.map((b) => b.alto));
         <a
           href={ruta("/formulario")}
           data-ga="cta_comenzar"
-          class="btn btn-rojo btn-brillo js-pausable h-11 px-5! py-0! text-[15px]"
+          class="js-cta-principal btn btn-rojo btn-brillo js-pausable h-11 px-5! py-0! text-[15px]"
         >
           {portada.ctaPrincipal}
           <Flecha />
@@ -66,7 +66,7 @@ const altoMax = Math.max(...graficoInicio.barras.map((b) => b.alto));
     </section>
 
     <section
-      class="reveal reveal-d1 flex min-h-[25rem] min-w-0 flex-[1_1_300px] flex-col overflow-hidden rounded-lg bg-raised"
+      class="js-pausable reveal reveal-d1 flex min-h-[25rem] min-w-0 flex-[1_1_300px] flex-col overflow-hidden rounded-lg bg-raised"
     >
       <div class="flex flex-col items-start gap-3.5 p-6 pb-0">
         <h2 class="text-sm">{graficoInicio.titulo}</h2>
@@ -142,7 +142,35 @@ const altoMax = Math.max(...graficoInicio.barras.map((b) => b.alto));
     }
   </div>
 
-  {/* 4. Nuestros planes */}
+  {/* 4. ¿Cómo funciona? (antes que los planes) */}
+  <h2 id="como-funciona" class="mt-5 scroll-mt-6 text-2xl font-medium md:text-3xl">
+    {comoFunciona.titulo}
+    <span class="text-lg font-normal text-muted md:text-xl">{comoFunciona.contador}</span>
+  </h2>
+  <div class="fichas-pasos flex flex-wrap gap-5">
+    {
+      comoFunciona.pasos.map((p, i) => (
+        <section
+          tabindex="0"
+          class={`ficha-paso js-pausable reveal reveal-d${i % 4} flex min-w-0 flex-[1_1_200px] flex-col gap-3 rounded-lg bg-raised p-6`}
+        >
+          <div class="avance" aria-hidden="true">
+            <div style={`width:${(i + 1) * 20}%; --d:${i * 120}ms; --bd:${i * 0.9}s`} />
+          </div>
+          <p class="paso-num panel-num text-[40px] font-medium leading-none transition-colors md:text-[32px]">
+            0{i + 1}
+          </p>
+          <h3 class="text-lg font-medium leading-6">{p.titulo}</h3>
+          <p class="text-[15px] leading-[23px] text-muted md:text-[14px] md:leading-[21px]">{p.texto}</p>
+        </section>
+      ))
+    }
+  </div>
+
+  {/* Franja del formulario de inicio, debajo de ¿Cómo funciona? */}
+  <FranjaFormulario />
+
+  {/* 5. Nuestros planes */}
   <h2 class="mt-5 text-2xl font-medium md:text-3xl">
     Nuestros planes <span class="text-lg font-normal text-muted md:text-xl">/3</span>
   </h2>
@@ -203,39 +231,22 @@ const altoMax = Math.max(...graficoInicio.barras.map((b) => b.alto));
                 {plan.modalidad}
               </span>
             </p>
+            <a
+              href={ruta(`/servicios#${plan.id}`)}
+              data-ga="plan_detalle_click"
+              data-ga-plan={plan.nombre}
+              class={`btn h-10 w-full justify-between px-4! py-0! text-[14px] ${
+                inv ? "bg-inv-contra text-inv" : "btn-outline"
+              }`}
+            >
+              Ver en detalle
+              <Flecha />
+            </a>
           </section>
         );
       })
     }
   </div>
-
-  {/* 5. ¿Cómo funciona? */}
-  <h2 id="como-funciona" class="mt-5 scroll-mt-6 text-2xl font-medium md:text-3xl">
-    {comoFunciona.titulo}
-    <span class="text-lg font-normal text-muted md:text-xl">{comoFunciona.contador}</span>
-  </h2>
-  <div class="fichas-pasos flex flex-wrap gap-5">
-    {
-      comoFunciona.pasos.map((p, i) => (
-        <section
-          tabindex="0"
-          class={`ficha-paso js-pausable reveal reveal-d${i % 4} flex min-w-0 flex-[1_1_200px] flex-col gap-3 rounded-lg bg-raised p-6`}
-        >
-          <div class="avance" aria-hidden="true">
-            <div style={`width:${(i + 1) * 20}%; --d:${i * 120}ms; --bd:${i * 0.9}s`} />
-          </div>
-          <p class="paso-num panel-num text-[40px] font-medium leading-none transition-colors md:text-[32px]">
-            0{i + 1}
-          </p>
-          <h3 class="text-lg font-medium leading-6">{p.titulo}</h3>
-          <p class="text-[15px] leading-[23px] text-muted md:text-[14px] md:leading-[21px]">{p.texto}</p>
-        </section>
-      ))
-    }
-  </div>
-
-  {/* Franja del formulario de inicio, debajo de ¿Cómo funciona? */}
-  <FranjaFormulario />
 
   {/* 6. Lo que ganás con tus datos ordenados */}
   <h2 class="mt-5 text-2xl font-medium md:text-3xl">

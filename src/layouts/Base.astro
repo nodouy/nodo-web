@@ -12,10 +12,9 @@ interface Props {
   /** Nombre de la sección, en grande en el encabezado del reporte. */
   seccion: string;
   descripcion?: string;
-  etiqueta?: string;
 }
 
-const { titulo, seccion, descripcion = site.descripcion, etiqueta } = Astro.props;
+const { titulo, seccion, descripcion = site.descripcion } = Astro.props;
 ---
 
 <!doctype html>
@@ -70,7 +69,7 @@ const { titulo, seccion, descripcion = site.descripcion, etiqueta } = Astro.prop
       <BarraLateral />
       <div class="flex min-h-screen min-w-0 flex-1 flex-col">
         <div class="flex flex-1 flex-col gap-5 px-5 pb-16 pt-7 md:px-10 md:pt-8">
-          <EncabezadoPagina seccion={seccion} etiqueta={etiqueta} />
+          <EncabezadoPagina seccion={seccion} ctaDiferido={seccion === "Inicio"} />
           <main class="flex flex-1 flex-col gap-5">
             <slot />
           </main>
@@ -94,9 +93,25 @@ const { titulo, seccion, descripcion = site.descripcion, etiqueta } = Astro.prop
         if (!objetivo) return;
         const w = window as typeof window & { gtag?: (...args: unknown[]) => void };
         if (typeof w.gtag === "function") {
-          w.gtag("event", (objetivo as HTMLElement).dataset.ga, {
-            pagina: location.pathname,
-          });
+          const datos: Record<string, string> = { pagina: location.pathname };
+          const plan = (objetivo as HTMLElement).dataset.gaPlan;
+          if (plan) datos.plan = plan;
+          w.gtag("event", (objetivo as HTMLElement).dataset.ga, datos);
+        }
+      });
+
+      // Tarjetas que se dan vuelta: giran al tocar o con Enter/Espacio
+      // (el hover y el foco de teclado van por CSS).
+      document.addEventListener("click", (e) => {
+        const giro = (e.target as Element).closest?.(".js-giro");
+        if (giro) giro.classList.toggle("volteada");
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key !== "Enter" && e.key !== " ") return;
+        const giro = (e.target as Element).closest?.(".js-giro");
+        if (giro) {
+          e.preventDefault();
+          giro.classList.toggle("volteada");
         }
       });
 
@@ -176,6 +191,35 @@ const { titulo, seccion, descripcion = site.descripcion, etiqueta } = Astro.prop
             { threshold: 0.4 },
           );
           contadores.forEach((el) => ioContador.observe(el));
+        }
+
+        // En el Inicio, el CTA del encabezado aparece recién cuando el
+        // del bloque principal sale de pantalla.
+        const ctaEncabezado = document.querySelector<HTMLElement>(".js-cta-encabezado");
+        const ctaPrincipal = document.querySelector<HTMLElement>(".js-cta-principal");
+        if (ctaEncabezado?.dataset.diferido === "1") {
+          if (ctaPrincipal && "IntersectionObserver" in window) {
+            const ioCta = new IntersectionObserver((entradas) => {
+              ctaEncabezado.classList.toggle(
+                "cta-oculto",
+                entradas[0]?.isIntersecting ?? false,
+              );
+            });
+            ioCta.observe(ctaPrincipal);
+          } else {
+            ctaEncabezado.classList.remove("cta-oculto");
+          }
+        }
+
+        // Al llegar a un plan desde "Ver en detalle", resaltarlo un instante.
+        if (/^#(standard|pro|full)$/.test(location.hash)) {
+          const plan = document.querySelector<HTMLElement>(location.hash);
+          if (plan) {
+            plan.scrollIntoView({ block: "start" });
+            plan.classList.remove("destello-plan");
+            requestAnimationFrame(() => plan.classList.add("destello-plan"));
+            setTimeout(() => plan.classList.remove("destello-plan"), 1600);
+          }
         }
 
         // Cambio de tema claro/oscuro (botones nuevos en cada página).

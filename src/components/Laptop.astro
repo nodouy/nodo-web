@@ -1,10 +1,10 @@
 ---
 /**
- * La MacBook dibujada con CSS, sin imágenes. Diseño simple elegido por
- * el cliente: pantalla con bisel, muesca y base fina, sin teclado.
- * Aparece solo tres veces en el sitio: portada, servicios y (a futuro)
- * la muestra. El contenido del slot es el panel simulado, que siempre
- * es claro sin importar el modo del sitio.
+ * La notebook del sitio, según la referencia del cliente: vista de
+ * frente, pantalla 16:10 de proporción fija (nunca se estira ni se
+ * aplasta), marco negro fino con cámara y base plateada con muesca.
+ * Dibujada con HTML/CSS, sin imágenes. La pantalla sigue el tema
+ * claro/oscuro; el slot es el reporte de ejemplo de cada plan.
  */
 interface Props {
   class?: string;
@@ -12,10 +12,13 @@ interface Props {
 const { class: className = "" } = Astro.props;
 ---
 
-<div class={`laptop ${className}`}>
-  <div class="laptop-screen">
-    <div class="laptop-notch" aria-hidden="true"></div>
-    <slot />
+<div class={`notebook ${className}`}>
+  <div class="notebook-pantalla">
+    <div class="notebook-camara" aria-hidden="true"></div>
+    <div class="notebook-display">
+      <slot />
+    </div>
   </div>
-  <div class="laptop-base" aria-hidden="true"></div>
+  <div class="notebook-borde" aria-hidden="true"></div>
+  <div class="notebook-base" aria-hidden="true"><div></div></div>
 </div>

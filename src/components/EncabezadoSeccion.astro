@@ -1,0 +1,85 @@
+---
+/**
+ * Encabezado de sección del reporte: dos columnas. A la izquierda una
+ * frase corta con la idea clave en medium; a la derecha una ilustración
+ * animada con el lenguaje de la marca (puntos, barras, líneas, rojo de
+ * acento), distinta por página y en bucle suave.
+ *
+ * Con prefers-reduced-motion las ilustraciones quedan en su estado
+ * final, quietas. El texto largo original va en el slot, dentro de un
+ * "Ver más", hasta que el cliente apruebe el recorte definitivo.
+ */
+interface Props {
+  frase: string;
+  destacada: string;
+  variante: "planes" | "seguridad" | "contacto";
+  verMas?: boolean;
+}
+const { frase, destacada, variante, verMas = false } = Astro.props;
+---
+
+<section class="reveal grid items-center gap-6 rounded-lg bg-raised p-6 md:grid-cols-[minmax(0,1fr)_auto] md:p-7">
+  <div class="min-w-0 max-w-prose">
+    <p class="text-xl leading-snug md:text-[22px] md:leading-[30px]">
+      {frase}
+      <span class="font-medium text-accent">{destacada}</span>
+    </p>
+    {
+      verMas && (
+        <details class="group mt-3">
+          <summary class="flex w-fit cursor-pointer list-none items-center gap-1.5 text-sm text-muted transition-colors hover:text-accent [&::-webkit-details-marker]:hidden">
+            Ver más
+            <svg class="transition-transform duration-200 group-open:rotate-45" width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+            </svg>
+          </summary>
+          <div class="mt-2 flex max-w-prose flex-col gap-2 text-sm leading-relaxed text-muted md:text-[14px]">
+            <slot />
+          </div>
+        </details>
+      )
+    }
+  </div>
+
+  <div class={`ilus ilus-${variante} justify-self-start md:justify-self-end`} aria-hidden="true">
+    {
+      variante === "planes" && (
+        <>
+          <div class="ilus-barras">
+            <span />
+            <span />
+            <span class="ilus-rojo" />
+          </div>
+          <div class="ilus-rotulos">
+            <span>La foto</span>
+            <span>La película</span>
+            <span>El copiloto</span>
+          </div>
+        </>
+      )
+    }
+    {
+      variante === "seguridad" && (
+        <div class="ilus-caja">
+          <span class="ilus-punto" />
+          <span class="ilus-punto" />
+          <span class="ilus-punto" />
+          <span class="ilus-punto ilus-rojo" />
+        </div>
+      )
+    }
+    {
+      variante === "contacto" && (
+        <div class="ilus-charla">
+          <span class="ilus-burbuja" />
+          <span class="ilus-burbuja ilus-burbuja--der" />
+          <span class="ilus-burbuja ilus-burbuja--rojo">
+            <i />
+            <i />
+            <i />
+          </span>
+        </div>
+      )
+    }
+  </div>
+</section>
