@@ -33,16 +33,26 @@ const { titulo, seccion, descripcion = site.descripcion } = Astro.props;
 
     {/* Antes de pintar: marcar que hay JS y aplicar el tema guardado.
         El sitio abre en modo claro por defecto; la elección de la
-        persona se recuerda entre visitas. */}
+        persona se recuerda entre visitas.
+
+        Con las View Transitions, cada navegación reemplaza los
+        atributos de <html> por los del documento nuevo (que no trae
+        data-theme ni la clase js), así que se reaplican en
+        astro:after-swap, antes del primer pintado, para que el tema
+        elegido se mantenga en todo el sitio sin parpadeos. */}
     <script is:inline>
       (function () {
-        var d = document.documentElement;
-        d.classList.add("js");
-        var t = null;
-        try {
-          t = localStorage.getItem("nodo-theme");
-        } catch (e) {}
-        d.dataset.theme = t === "light" || t === "dark" ? t : "light";
+        function aplicarTema() {
+          var d = document.documentElement;
+          d.classList.add("js");
+          var t = null;
+          try {
+            t = localStorage.getItem("nodo-theme");
+          } catch (e) {}
+          d.dataset.theme = t === "light" || t === "dark" ? t : "light";
+        }
+        aplicarTema();
+        document.addEventListener("astro:after-swap", aplicarTema);
       })();
     </script>
     <!-- Google Analytics 4 -->

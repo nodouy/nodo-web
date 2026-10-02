@@ -55,14 +55,8 @@ const altoMax = Math.max(...graficoInicio.barras.map((b) => b.alto));
           {portada.ctaWhatsapp}
         </a>
       </div>
-      <a
-        href={ruta("/contacto#agenda")}
-        data-ga="agenda_click"
-        class="enlace-flecha relative flex min-h-11 items-center gap-1.5 text-[15px] text-muted transition-colors hover:text-accent"
-      >
-        {portada.ctaHablar}
-        <Flecha />
-      </a>
+      {/* La opción de agendar vive en el formulario y en Contacto;
+          acá quedan solo los dos botones. */}
     </section>
 
     <section
@@ -84,10 +78,14 @@ const altoMax = Math.max(...graficoInicio.barras.map((b) => b.alto));
         {
           graficoInicio.barras.map((b) => (
             <div
-              class={`rep-bar flex items-end justify-center pb-3 text-[13px] ${b.hot ? "rep-bar--hot" : ""}`}
+              class="rep-col relative flex min-w-0 flex-1 items-end justify-center"
               style={`height:${(Math.round((b.alto / altoMax) * 215) / 16).toFixed(2)}rem`}
             >
-              <span class={b.hot ? "text-white" : "text-inv-muted"}>{b.mes}</span>
+              {/* La barra escala sola; la etiqueta del mes queda fija encima */}
+              <div class={`rep-bar absolute inset-0 ${b.hot ? "rep-bar--hot" : ""}`} aria-hidden="true" />
+              <span class={`rep-mes relative pb-3 text-[13px] ${b.hot ? "text-white" : "text-inv-muted"}`}>
+                {b.mes}
+              </span>
             </div>
           ))
         }
