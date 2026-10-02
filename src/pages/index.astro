@@ -42,10 +42,8 @@ const desfaseQs = (i: number) =>
 
 <Base titulo="NODO — Análisis de datos para pymes y emprendimientos de Uruguay">
   {/* 1. Portada */}
-  <section class="js-hero relative overflow-hidden">
-    <div class="js-campo absolute inset-0" aria-hidden="true">
-      <div class="campo-puntos campo-deriva js-pausable"></div>
-    </div>
+  {/* El fondo de puntos del sitio (canvas global) corre detrás del hero */}
+  <section class="js-hero relative">
     <div
       class="relative mx-auto grid max-w-6xl items-center gap-10 px-5 pb-14 pt-14 md:grid-cols-2 md:gap-12 md:pb-24 md:pt-20"
     >

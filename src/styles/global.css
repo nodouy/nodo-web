@@ -172,7 +172,7 @@ h4 {
     background: linear-gradient(
       105deg,
       transparent 0%,
-      var(--brillo, rgb(255 255 255 / 0.35)) 50%,
+      var(--brillo, rgb(255 255 255 / 0.5)) 50%,
       transparent 100%
     );
     transform: translateX(-130%) skewX(-18deg);
@@ -202,7 +202,7 @@ h4 {
 
 /* Variante para botones de fondo claro: destello oscuro sutil */
 .btn-brillo-tinta {
-  --brillo: rgb(31 33 36 / 0.12);
+  --brillo: rgb(31 33 36 / 0.18);
 }
 
 .pill {
@@ -404,31 +404,14 @@ input[type="checkbox"] {
 }
 
 /* ------------------------------------------------------------------ */
-/* Campo de puntos decorativo de fondo                                 */
+/* Fondo de puntos animado de todo el sitio (canvas, ver fondo.ts).    */
+/* Va detrás del contenido y nunca captura el mouse.                   */
 /* ------------------------------------------------------------------ */
-.campo-puntos {
-  position: absolute;
-  inset: -70px;
+.js-fondo {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
   pointer-events: none;
-  background-image: radial-gradient(var(--line) 1.5px, transparent 1.5px);
-  background-size: 26px 26px;
-  mask-image: radial-gradient(ellipse 90% 70% at 50% 20%, black 0%, transparent 70%);
-}
-
-/* Deriva ambiente, bien sutil: el campo respira aunque no scrollees. */
-@media (prefers-reduced-motion: no-preference) {
-  .campo-deriva {
-    animation: campo-deriva 26s ease-in-out infinite alternate;
-  }
-}
-
-@keyframes campo-deriva {
-  from {
-    transform: translate3d(0, 0, 0);
-  }
-  to {
-    transform: translate3d(26px, 18px, 0);
-  }
 }
 
 /* ------------------------------------------------------------------ */
@@ -509,7 +492,7 @@ input[type="checkbox"] {
     transform: scale(1);
   }
   50% {
-    transform: scale(1.04);
+    transform: scale(1.07);
   }
 }
 
@@ -557,8 +540,7 @@ input[type="checkbox"] {
     animation-delay: var(--rd, 0s);
   }
 
-  html.js .qs-grafica.fuera .qs-dot,
-  html.js .campo-deriva.fuera {
+  html.js .qs-grafica.fuera .qs-dot {
     animation-play-state: paused;
   }
 }
@@ -570,8 +552,8 @@ input[type="checkbox"] {
     opacity: 1;
   }
   50% {
-    transform: scale(1.06);
-    opacity: 0.86;
+    transform: scale(1.1);
+    opacity: 0.78;
   }
 }
 
@@ -583,10 +565,10 @@ input[type="checkbox"] {
 @media (prefers-reduced-motion: no-preference) {
   html.js .reveal {
     opacity: 0;
-    transform: translateY(22px);
+    transform: translateY(30px);
     transition:
-      opacity 0.45s ease,
-      transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+      opacity 0.5s ease,
+      transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   html.js .reveal.is-visible {

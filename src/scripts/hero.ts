@@ -61,18 +61,6 @@ if (!reduce) {
     );
   }
 
-  // El campo de puntos del fondo reacciona levemente al scroll.
-  const campo = document.querySelector(".js-campo");
-  if (campo) {
-    gsap.to(campo, {
-      y: -70,
-      ease: "none",
-      scrollTrigger: {
-        trigger: ".js-hero",
-        start: "top top",
-        end: "bottom top",
-        scrub: true,
-      },
-    });
-  }
+  // El fondo de puntos del sitio vive en fondo.ts (canvas global):
+  // acompaña el scroll por su cuenta y no necesita ScrollTrigger.
 }
