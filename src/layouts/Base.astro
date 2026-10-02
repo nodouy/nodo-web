@@ -60,8 +60,6 @@ const { titulo, descripcion = site.descripcion } = Astro.props;
     </script>
   </head>
   <body class="flex min-h-screen flex-col">
-    {/* Halo que acompaña al mouse (ver fondo.ts) */}
-    <div class="js-halo" aria-hidden="true"></div>
     <Header />
     <main class="flex-1">
       <slot />
@@ -69,8 +67,6 @@ const { titulo, descripcion = site.descripcion } = Astro.props;
     <Footer />
 
     <script>
-      import "../scripts/fondo";
-
       // Aparición al scrollear. Los elementos están visibles por defecto;
       // solo se esconden si hay JS y el visitante no pidió reducir el
       // movimiento (ver global.css).
