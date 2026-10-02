@@ -74,7 +74,7 @@ if (canvas) {
           const onda = reduce
             ? 0
             : Math.sin((x + y + corrimiento) * 0.011 - t * 0.0011);
-          let radio = 1.7 + 0.8 * onda;
+          let radio = 1.15 + 0.5 * onda;
           let alfa = alfaBase * (0.55 + 0.45 * onda);
           let r = base[0];
           let g = base[1];
@@ -84,7 +84,7 @@ if (canvas) {
             const d = Math.hypot(x - puntero.sx, y - puntero.sy);
             if (d < RADIO_HALO) {
               const fuerza = (1 - d / RADIO_HALO) ** 2;
-              radio += 2.6 * fuerza;
+              radio += 2 * fuerza;
               alfa += (0.6 - alfa) * fuerza;
               r += (ROJO[0] - r) * fuerza;
               g += (ROJO[1] - g) * fuerza;
