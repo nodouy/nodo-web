@@ -404,12 +404,14 @@ input[type="checkbox"] {
 }
 
 /* ------------------------------------------------------------------ */
-/* Lectura de gráfico en el hero (canvas, ver grafico.ts): una línea   */
-/* de tendencia de fondo que el cursor va "leyendo".                   */
+/* Lectura de gráfico (canvas, ver grafico.ts): la línea de tendencia  */
+/* que el cursor va "leyendo", como fondo fijo de todo el sitio.       */
+/* Los bloques marcados con .atenua-grafico la atenúan al pasar.       */
 /* ------------------------------------------------------------------ */
 .js-grafico {
-  position: absolute;
+  position: fixed;
   inset: 0;
+  z-index: -1;
   pointer-events: none;
 }
 

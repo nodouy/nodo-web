@@ -60,6 +60,9 @@ const { titulo, descripcion = site.descripcion } = Astro.props;
     </script>
   </head>
   <body class="flex min-h-screen flex-col">
+    {/* La línea de tendencia que el cursor va "leyendo": fondo fijo de
+        todo el sitio (ver grafico.ts) */}
+    <canvas class="js-grafico" aria-hidden="true"></canvas>
     <Header />
     <main class="flex-1">
       <slot />
@@ -67,6 +70,8 @@ const { titulo, descripcion = site.descripcion } = Astro.props;
     <Footer />
 
     <script>
+      import "../scripts/grafico";
+
       // Aparición al scrollear. Los elementos están visibles por defecto;
       // solo se esconden si hay JS y el visitante no pidió reducir el
       // movimiento (ver global.css).

@@ -42,14 +42,12 @@ const desfaseQs = (i: number) =>
 
 <Base titulo="NODO — Análisis de datos para pymes y emprendimientos de Uruguay">
   {/* 1. Portada */}
-  <section class="js-hero relative overflow-hidden">
-    {/* La línea de tendencia que el cursor va "leyendo" (grafico.ts) */}
-    <canvas class="js-grafico" aria-hidden="true"></canvas>
+  <section class="js-hero relative">
     <div
       class="relative mx-auto grid max-w-6xl items-center gap-10 px-5 pb-14 pt-14 md:grid-cols-2 md:gap-12 md:pb-24 md:pt-20"
     >
       <div>
-        <span class="pill border border-line text-muted">{portada.etiqueta}</span>
+        <span class="pill whitespace-normal! border border-line text-muted">{portada.etiqueta}</span>
         <h1 class="mt-5 text-5xl leading-[1.05] tracking-tight md:text-6xl">
           {portada.titulo}
           <span class="text-accent">{portada.tituloAcento}</span>
@@ -228,7 +226,7 @@ const desfaseQs = (i: number) =>
       escala media, la marca dibujada como gráfico */}
   <section class="mx-auto max-w-6xl px-5 py-16 md:py-24">
     <div class="grid items-center gap-12 md:grid-cols-2">
-      <div class="reveal max-w-2xl">
+      <div class="atenua-grafico reveal max-w-2xl">
         <h2 class="text-3xl md:text-4xl">{quienesSomos.titulo}</h2>
         {
           quienesSomos.parrafos.map((p) => (
@@ -271,5 +269,4 @@ const desfaseQs = (i: number) =>
 
 <script>
   import "../scripts/hero";
-  import "../scripts/grafico";
 </script>

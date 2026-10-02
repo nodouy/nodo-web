@@ -1,75 +1,119 @@
 /**
- * Lectura de gráfico en el hero: una línea de tendencia de fondo que
- * sube de izquierda a derecha y ondula lentamente. El cursor la va
- * "leyendo": guías punteadas vertical y horizontal, un punto rojo
- * sobre la curva, el tramo recorrido pintado en el rojo de la marca
- * con un relleno muy tenue debajo, y el resto en gris suave sobre una
- * grilla horizontal apenas visible.
+ * Lectura de gráfico, fondo fijo de todo el sitio: una línea de
+ * tendencia que sube de izquierda a derecha y ondula lentamente, y que
+ * el cursor va "leyendo" — guías punteadas, punto sobre la curva, el
+ * tramo recorrido en el color de acento con un relleno tenue debajo, y
+ * el resto en gris suave sobre una grilla apenas visible.
  *
- * - El punto sigue al mouse con suavizado, nunca pegado al cursor.
- * - Sin mouse (celular): el punto avanza solo y acompaña el scroll.
- * - Funciona en modo claro y oscuro (el gris sale del color de texto).
- * - prefers-reduced-motion: se dibuja la línea estática una sola vez,
- *   sin seguimiento ni guías.
- * - Canvas con requestAnimationFrame a ~30 cuadros por segundo; se
- *   pausa si la pestaña no está visible o si el hero salió de pantalla.
+ * - Canvas a pantalla completa (fixed, detrás del contenido), montado
+ *   en Base.astro: está en todas las páginas. La fase de la onda se
+ *   guarda al salir de cada página, así la curva no se reinicia al
+ *   navegar.
+ * - El scroll la mantiene viva: cambia la fase de la onda, así no se ve
+ *   siempre el mismo tramo.
+ * - El punto sigue al mouse con suavizado; sin mouse (celular) avanza
+ *   solo y acompaña el scroll.
+ * - Colores desde las variables CSS del tema (--fg, --accent, --bg):
+ *   al cambiar de modo el canvas se actualiza al instante. El aro del
+ *   punto usa el color de fondo del tema, como recorte.
+ * - Los bloques con la clase .atenua-grafico (texto largo sin tarjeta)
+ *   bajan la opacidad de todo el dibujo mientras están a la vista.
+ * - prefers-reduced-motion: línea estática, sin lectura.
+ * - ~30 cuadros por segundo; pausa total con la pestaña oculta.
  */
 
 const canvas = document.querySelector<HTMLCanvasElement>(".js-grafico");
 const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const conMouse = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 
-const ROJO = "201,44,46"; // #C92C2E
-
 if (canvas) {
   const ctx = canvas.getContext("2d");
-  const seccion = canvas.closest("section");
-  if (ctx && seccion) {
+  if (ctx) {
     let W = 0;
     let H = 0;
-    let tinta = "31,33,36";
 
-    const A = (o: number) => `rgba(${ROJO},${o})`;
-    const D = (o: number) => `rgba(${tinta},${o})`;
+    // Colores del tema, leídos de las variables CSS como "r,g,b"
+    let fg = "31,33,36";
+    let acc = "201,44,46";
+    let bg = "250,248,245";
+    const C = (rgb: string, o: number) => `rgba(${rgb},${o})`;
 
-    function leerTema() {
-      tinta =
-        document.documentElement.dataset.theme === "dark"
-          ? "245,243,240"
-          : "31,33,36";
+    function hexARgb(hex: string, previo: string): string {
+      const h = hex.trim().replace("#", "");
+      if (h.length === 3) {
+        return h
+          .split("")
+          .map((c) => parseInt(c + c, 16))
+          .join(",");
+      }
+      if (h.length === 6) {
+        return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16)).join(",");
+      }
+      return previo;
+    }
+
+    function leerColores() {
+      const estilos = getComputedStyle(document.documentElement);
+      fg = hexARgb(estilos.getPropertyValue("--fg"), fg);
+      acc = hexARgb(estilos.getPropertyValue("--accent"), acc);
+      bg = hexARgb(estilos.getPropertyValue("--bg"), bg);
     }
 
     function medir() {
       const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-      W = seccion!.clientWidth;
-      H = seccion!.clientHeight;
+      W = window.innerWidth;
+      H = window.innerHeight;
       canvas!.width = Math.round(W * dpr);
       canvas!.height = Math.round(H * dpr);
       ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 
-    // posición del cursor (x objetivo y x suavizada)
-    const m = { x: -1, sx: 0, conCursor: false };
-    let t = 0; // segundos
+    // Bloques de texto largo que atenúan el dibujo mientras se ven
+    const bloques = [...document.querySelectorAll(".atenua-grafico")];
+    let dim = 1;
 
-    // La curva: arranca abajo a la izquierda y sube hacia la derecha.
-    // La pendiente es relativa al tamaño del hero para que no se escape
-    // por arriba ni cruce el título ni el botón. En pantallas angostas
-    // (hero apilado, sin zona libre) sube menos y ondula menos: queda
-    // en el tercio inferior, detrás de la laptop.
+    const m = { x: -1, sx: 0, conCursor: false };
+    // La fase continúa entre páginas: el tiempo arranca donde quedó
+    let t = 0;
+    const t0 = (() => {
+      try {
+        return parseFloat(sessionStorage.getItem("nodo-grafico-t") ?? "0") || 0;
+      } catch {
+        return 0;
+      }
+    })();
+
+    // La curva: sube de izquierda a derecha por la franja inferior del
+    // viewport. El scroll le cambia la fase para que siga viva. En
+    // pantallas angostas sube y ondula menos.
     const angosto = () => W < 768;
-    const f = (x: number) =>
-      H * (angosto() ? 0.88 : 0.84) -
-      x * ((H * (angosto() ? 0.18 : 0.42)) / Math.max(W, 1)) -
-      (angosto() ? 28 : 46) * Math.sin(x / 120 + t * 0.25) -
-      (angosto() ? 13 : 22) * Math.sin(x / 47 + 1.3 - t * 0.4);
+    const f = (x: number) => {
+      const fase = window.scrollY * 0.003;
+      return (
+        H * (angosto() ? 0.86 : 0.82) -
+        x * ((H * (angosto() ? 0.16 : 0.36)) / Math.max(W, 1)) -
+        (angosto() ? 28 : 46) * Math.sin(x / 120 + t * 0.25 + fase) -
+        (angosto() ? 13 : 22) * Math.sin(x / 47 + 1.3 - t * 0.4 + fase * 1.7)
+      );
+    };
 
     function dibujar() {
       ctx!.clearRect(0, 0, W, H);
 
+      // atenuación suave si hay un bloque de texto largo a la vista
+      let objetivoDim = 1;
+      for (const b of bloques) {
+        const r = b.getBoundingClientRect();
+        if (r.height > 0 && r.bottom > H * 0.35 && r.top < H) {
+          objetivoDim = 0.4;
+          break;
+        }
+      }
+      dim += (objetivoDim - dim) * 0.08;
+
       // grilla horizontal apenas visible
       ctx!.lineWidth = 1;
-      ctx!.strokeStyle = D(0.07);
+      ctx!.strokeStyle = C(fg, 0.07 * dim);
       for (let i = 1; i < 6; i++) {
         ctx!.beginPath();
         ctx!.moveTo(0, (i * H) / 6);
@@ -77,8 +121,8 @@ if (canvas) {
         ctx!.stroke();
       }
 
-      // línea completa en gris suave
-      ctx!.strokeStyle = D(0.22);
+      // línea completa en gris suave (clara en modo oscuro)
+      ctx!.strokeStyle = C(fg, 0.22 * dim);
       ctx!.lineWidth = 1.5;
       ctx!.beginPath();
       ctx!.moveTo(0, f(0));
@@ -103,11 +147,11 @@ if (canvas) {
       ctx!.lineTo(mx, my);
       ctx!.lineTo(mx, H);
       ctx!.closePath();
-      ctx!.fillStyle = A(0.05);
+      ctx!.fillStyle = C(acc, 0.05 * dim);
       ctx!.fill();
 
-      // el tramo recorrido, en el rojo de la marca
-      ctx!.strokeStyle = A(0.75);
+      // el tramo recorrido, en el color de acento del tema
+      ctx!.strokeStyle = C(acc, 0.75 * dim);
       ctx!.lineWidth = 2;
       ctx!.beginPath();
       ctx!.moveTo(0, f(0));
@@ -118,7 +162,7 @@ if (canvas) {
       // guías punteadas que siguen la lectura
       ctx!.setLineDash([4, 4]);
       ctx!.lineWidth = 1;
-      ctx!.strokeStyle = D(0.16);
+      ctx!.strokeStyle = C(fg, 0.16 * dim);
       ctx!.beginPath();
       ctx!.moveTo(mx, 0);
       ctx!.lineTo(mx, H);
@@ -127,13 +171,14 @@ if (canvas) {
       ctx!.stroke();
       ctx!.setLineDash([]);
 
-      // el punto rojo que marca la lectura
+      // el punto: aro del color de fondo (recorte) y centro en acento
+      const visDim = Math.max(dim, 0.55);
       ctx!.beginPath();
-      ctx!.fillStyle = A(0.22);
-      ctx!.arc(mx, my, 10, 0, 6.2832);
+      ctx!.fillStyle = C(bg, 1);
+      ctx!.arc(mx, my, 9, 0, 6.2832);
       ctx!.fill();
       ctx!.beginPath();
-      ctx!.fillStyle = A(0.95);
+      ctx!.fillStyle = C(acc, 0.95 * visDim);
       ctx!.arc(mx, my, 4.5, 0, 6.2832);
       ctx!.fill();
     }
@@ -141,16 +186,15 @@ if (canvas) {
     // Bucle a ~30 cuadros por segundo
     let rafId = 0;
     let previo = 0;
-    let enPantalla = true;
     function cuadro(ms: number) {
       rafId = requestAnimationFrame(cuadro);
       if (ms - previo < 33) return;
       previo = ms;
-      t = ms / 1000;
+      t = t0 + ms / 1000;
       dibujar();
     }
     function arrancar() {
-      if (!rafId && !reduce && enPantalla && !document.hidden)
+      if (!rafId && !reduce && !document.hidden)
         rafId = requestAnimationFrame(cuadro);
     }
     function frenar() {
@@ -158,7 +202,7 @@ if (canvas) {
       rafId = 0;
     }
 
-    leerTema();
+    leerColores();
     medir();
     if (reduce) {
       dibujar();
@@ -166,21 +210,41 @@ if (canvas) {
       arrancar();
     }
 
+    // gancho mínimo de verificación en desarrollo
+    (window as unknown as Record<string, unknown>).__grafico = {
+      estado: () => ({
+        rafId,
+        W,
+        H,
+        fg,
+        acc,
+        bg,
+        dim,
+        reduce,
+        hidden: document.hidden,
+      }),
+      dibujar,
+    };
+
     window.addEventListener("resize", () => {
       medir();
       if (reduce) dibujar();
     });
 
-    // pausa con la pestaña oculta o con el hero fuera de pantalla
+    // pausa total con la pestaña oculta
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) frenar();
       else arrancar();
     });
-    new IntersectionObserver((entradas) => {
-      enPantalla = entradas[0]?.isIntersecting ?? true;
-      if (enPantalla) arrancar();
-      else frenar();
-    }).observe(seccion);
+
+    // la fase sigue en la próxima página
+    window.addEventListener("pagehide", () => {
+      try {
+        sessionStorage.setItem("nodo-grafico-t", String(t));
+      } catch {
+        /* sin almacenamiento, la curva arranca de cero */
+      }
+    });
 
     if (conMouse && !reduce) {
       window.addEventListener(
@@ -193,9 +257,9 @@ if (canvas) {
       );
     }
 
-    // el gris de la línea sigue el modo claro/oscuro
+    // el canvas sigue el modo claro/oscuro al instante
     new MutationObserver(() => {
-      leerTema();
+      leerColores();
       if (reduce) dibujar();
     }).observe(document.documentElement, {
       attributes: true,
