@@ -15,6 +15,14 @@ export const intro = {
   ],
 };
 
+// Encabezado nuevo de la página (frase corta + ilustración). El texto
+// original de la intro queda disponible bajo "Ver más" hasta que el
+// cliente apruebe el recorte definitivo.
+export const encabezado = {
+  frase: "Tus datos ya cuentan la historia.",
+  destacada: "Nosotros la ordenamos para que decidas.",
+};
+
 export const recorrido = {
   titulo: "Tres planes, tres preguntas",
   bajada:

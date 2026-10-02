@@ -1,0 +1,63 @@
+---
+/**
+ * Tarjeta que se da vuelta (Seguridad): el frente muestra un ícono de
+ * línea, el título y una marca de giro en la esquina; el dorso, la
+ * explicación corta en colores invertidos.
+ *
+ * Gira con hover, con foco de teclado y al tocar o apretar Enter/Espacio
+ * (listener global en Base.astro sobre .js-giro). Con
+ * prefers-reduced-motion no hay rotación: las caras se intercambian por
+ * opacidad (ver .giro en global.css).
+ */
+interface Props {
+  titulo: string;
+  dorso: string;
+  /** Trazo del ícono de línea, en viewBox 24×24. */
+  icono: string;
+  /** Línea chica bajo el título, p. ej. "Dropbox · Excel · Google Sheets". */
+  subtitulo?: string;
+  class?: string;
+}
+const { titulo, dorso, icono, subtitulo, class: clase = "" } = Astro.props;
+---
+
+<div class={`giro js-giro ${clase}`} tabindex="0" role="button" aria-label={`${titulo}. Dar vuelta la tarjeta para leer el resumen`}>
+  <div class="giro-nucleo">
+    <div class="giro-cara giro-frente">
+      <svg
+        width="26"
+        height="26"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.7"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="text-accent"
+        aria-hidden="true"
+      >
+        <path d={icono} />
+      </svg>
+      <h3 class="text-lg font-medium leading-snug md:text-[16px] md:leading-[22px]">{titulo}</h3>
+      {subtitulo && <p class="panel-num text-sm text-muted md:text-[13px]">{subtitulo}</p>}
+      {/* Marca de giro: avisa que la tarjeta tiene un dorso */}
+      <svg
+        class="absolute right-4 top-4 text-muted"
+        width="15"
+        height="15"
+        viewBox="0 0 16 16"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M13.5 3v3.5H10M2.5 13V9.5H6M13.1 6.5A5.5 5.5 0 0 0 3 5.3M2.9 9.5a5.5 5.5 0 0 0 10.1 1.2" />
+      </svg>
+    </div>
+    <div class="giro-cara giro-dorso">
+      <p class="text-sm leading-relaxed md:text-[14px]">{dorso}</p>
+    </div>
+  </div>
+</div>

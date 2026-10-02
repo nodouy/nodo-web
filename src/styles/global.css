@@ -1265,3 +1265,23 @@ input[type="checkbox"] {
     transform: none;
   }
 }
+
+/* Respuestas largas del acordeón (vienen como HTML desde los datos):
+   separación entre párrafos y lista con viñetas en el acento. */
+.acordeon-texto p + p,
+.acordeon-texto ul + p,
+.acordeon-texto p + ul {
+  margin-top: 0.625rem;
+}
+
+.acordeon-texto ul {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  padding-left: 1.1rem;
+  list-style: disc;
+}
+
+.acordeon-texto li::marker {
+  color: var(--accent);
+}

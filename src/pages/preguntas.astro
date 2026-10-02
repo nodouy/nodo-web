@@ -1,0 +1,22 @@
+---
+import Base from "../layouts/Base.astro";
+import Acordeon from "../components/Acordeon.astro";
+import { preguntas } from "../data/preguntas";
+---
+
+<Base
+  titulo="Preguntas frecuentes — NODO"
+  seccion="Preguntas frecuentes"
+  descripcion="Las preguntas que nos hacen antes de arrancar: formatos, plazos, formas de pago, licencias y cómo cuidamos tus datos."
+>
+  <section class="reveal rounded-lg bg-raised p-6 md:p-7">
+    <h2 class="max-w-prose text-3xl font-medium leading-tight tracking-tight md:text-4xl">
+      {preguntas.titulo}
+      <span class="text-accent">{preguntas.tituloAcento}</span>
+    </h2>
+    <p class="mt-4 max-w-prose leading-relaxed text-muted">{preguntas.bajada}</p>
+  </section>
+
+  {/* Una pregunta por vez: al abrir una se cierra la anterior */}
+  <Acordeon items={preguntas.items} exclusivo />
+</Base>

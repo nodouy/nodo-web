@@ -9,6 +9,14 @@ export const intro = {
     "Escribinos por donde te quede más cómodo. Respondemos rápido y sin vueltas.",
 };
 
+// Encabezado nuevo de la página (frase corta + ilustración). El texto
+// original de la intro queda disponible bajo "Ver más" hasta que el
+// cliente apruebe el recorte definitivo.
+export const encabezado = {
+  frase: "Contanos de tu negocio.",
+  destacada: "Respondemos rápido y sin vueltas.",
+};
+
 export const canales = {
   whatsappTitulo: "WhatsApp",
   whatsappTexto: "La vía más directa. Escribinos y te respondemos en el día.",
@@ -25,8 +33,27 @@ export const formulario = {
   campos: {
     nombre: "Tu nombre",
     rubro: "Rubro de tu negocio",
+    rubroVacio: "Elegí el rubro…",
+    rubroOtro: "¿Cuál es tu rubro?",
     mensaje: "Contanos qué necesitás",
   },
+  // Lista cerrada del desplegable de rubro. "Otro" despliega un campo
+  // de texto para el detalle, que viaja como "Otro: <detalle>".
+  rubros: [
+    "Comercio minorista",
+    "Gastronomía",
+    "Servicios profesionales",
+    "Salud y bienestar",
+    "Construcción e inmobiliaria",
+    "Industria y producción",
+    "Agro",
+    "Tecnología",
+    "Educación",
+    "Transporte y logística",
+    "Turismo y hotelería",
+    "Venta online",
+    "Otro",
+  ],
   boton: "Enviar el mensaje",
   enviando: "Enviando…",
   exitoTitulo: "Recibimos tu mensaje",

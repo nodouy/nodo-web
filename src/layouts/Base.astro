@@ -215,9 +215,21 @@ const { titulo, seccion, descripcion = site.descripcion } = Astro.props;
         if (/^#(standard|pro|full)$/.test(location.hash)) {
           const plan = document.querySelector<HTMLElement>(location.hash);
           if (plan) {
-            plan.scrollIntoView({ block: "start" });
+            // Instantáneo, como un ancla nativa: se llega desde otra
+            // página y no corresponde recorrer todo el scroll.
+            plan.scrollIntoView({ block: "start", behavior: "instant" });
+            // Segunda pasada: el router puede reposicionar el scroll
+            // justo después de este evento.
+            setTimeout(
+              () => plan.scrollIntoView({ block: "start", behavior: "instant" }),
+              60,
+            );
             plan.classList.remove("destello-plan");
-            requestAnimationFrame(() => plan.classList.add("destello-plan"));
+            // Reflujo forzado para que la animación se reinicie aunque
+            // se llegue dos veces al mismo plan (sin rAF: con la
+            // pestaña oculta quedaría congelado).
+            void plan.offsetWidth;
+            plan.classList.add("destello-plan");
             setTimeout(() => plan.classList.remove("destello-plan"), 1600);
           }
         }

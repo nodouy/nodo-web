@@ -1,9 +1,10 @@
 ---
 import Base from "../layouts/Base.astro";
 import Boton from "../components/Boton.astro";
+import EncabezadoSeccion from "../components/EncabezadoSeccion.astro";
 import Agenda from "../components/Agenda.astro";
 import { site, waLink, mailtoLink } from "../data/site";
-import { intro, canales, formulario, ubicacion } from "../data/contacto";
+import { intro, encabezado, canales, formulario, ubicacion } from "../data/contacto";
 ---
 
 <Base
@@ -11,13 +12,16 @@ import { intro, canales, formulario, ubicacion } from "../data/contacto";
   seccion="Contacto"
   descripcion="Escribinos por WhatsApp o correo, o agendá una reunión informativa sin compromiso."
 >
-  <section class="reveal rounded-lg bg-raised p-6 md:p-7">
-    <p class="text-sm text-muted">{intro.etiqueta}</p>
-    <h2 class="mt-3 max-w-prose text-3xl font-medium leading-tight tracking-tight md:text-4xl">
-      {intro.titulo}
-    </h2>
-    <p class="mt-4 max-w-prose leading-relaxed text-muted">{intro.bajada}</p>
-  </section>
+  {/* Encabezado nuevo. El texto original de la intro queda bajo
+      "Ver más" hasta que el cliente apruebe el recorte. */}
+  <EncabezadoSeccion
+    frase={encabezado.frase}
+    destacada={encabezado.destacada}
+    variante="contacto"
+    verMas
+  >
+    <p>{intro.bajada}</p>
+  </EncabezadoSeccion>
 
   <div class="flex flex-wrap gap-5">
       <article class="card-i reveal flex min-w-0 flex-[1_1_280px] flex-col items-start gap-3 rounded-lg bg-raised p-6">
@@ -92,11 +96,38 @@ import { intro, canales, formulario, ubicacion } from "../data/contacto";
 
       <div class="flex flex-col gap-1.5">
         <label for="rubro" class="text-sm font-medium">{formulario.campos.rubro}</label>
+        <div class="relative">
+          <select
+            id="rubro"
+            name="Rubro"
+            required
+            class="js-rubro w-full appearance-none rounded-lg border border-line bg-base px-4 py-3 pr-10 text-body"
+          >
+            <option value="" disabled selected>{formulario.campos.rubroVacio}</option>
+            {formulario.rubros.map((r) => <option value={r}>{r}</option>)}
+          </select>
+          <svg
+            class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-muted"
+            width="12"
+            height="12"
+            viewBox="0 0 12 12"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path d="M2 4.5 6 8.5 10 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+        <p class="error-campo hidden" data-error aria-live="polite"></p>
+      </div>
+
+      {/* Se muestra solo al elegir "Otro": el detalle viaja en el mismo
+          campo Rubro, como "Otro: <detalle>". */}
+      <div class="js-rubro-otro hidden flex-col gap-1.5">
+        <label for="rubro-otro" class="text-sm font-medium">{formulario.campos.rubroOtro}</label>
         <input
-          id="rubro"
-          name="Rubro"
+          id="rubro-otro"
+          name="RubroDetalle"
           type="text"
-          required
           class="rounded-lg border border-line bg-base px-4 py-3 text-body placeholder:text-muted"
         />
         <p class="error-campo hidden" data-error aria-live="polite"></p>
@@ -174,6 +205,22 @@ import { intro, canales, formulario, ubicacion } from "../data/contacto";
   if (!form || form.dataset.listo === "1") return;
   form.dataset.listo = "1";
 
+  // El campo de detalle aparece solo al elegir "Otro" en el rubro, y
+  // recién ahí pasa a ser obligatorio.
+  const rubro = form.querySelector<HTMLSelectElement>(".js-rubro");
+  const otroCampo = form.querySelector<HTMLElement>(".js-rubro-otro");
+  const otroDetalle = otroCampo?.querySelector<HTMLInputElement>("input");
+  rubro?.addEventListener("change", () => {
+    const esOtro = rubro.value === "Otro";
+    otroCampo?.classList.toggle("hidden", !esOtro);
+    otroCampo?.classList.toggle("flex", esOtro);
+    if (otroDetalle) {
+      otroDetalle.required = esOtro;
+      if (esOtro) otroDetalle.focus();
+      else otroDetalle.removeAttribute("aria-invalid");
+    }
+  });
+
   form.addEventListener("submit", async (evento) => {
     evento.preventDefault();
 
@@ -183,10 +230,12 @@ import { intro, canales, formulario, ubicacion } from "../data/contacto";
 
     // Validación con mensajes junto a cada campo.
     let primeroConError: HTMLElement | null = null;
-    for (const campo of form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(
-      "input[required], textarea[required]",
-    )) {
-      const aviso = campo.parentElement?.querySelector<HTMLElement>("[data-error]");
+    for (const campo of form.querySelectorAll<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >("input[required], textarea[required], select[required]")) {
+      const aviso = campo
+        .closest(".flex-col")
+        ?.querySelector<HTMLElement>("[data-error]");
       if (campo.value.trim() === "") {
         if (aviso) {
           aviso.textContent = "Este campo es obligatorio.";
@@ -208,11 +257,14 @@ import { intro, canales, formulario, ubicacion } from "../data/contacto";
     }
 
     const datos = new FormData(form);
+    // Si el rubro es "Otro", el detalle viaja en el mismo campo.
+    const rubroElegido = String(datos.get("Rubro") ?? "");
+    const detalle = String(datos.get("RubroDetalle") ?? "").trim();
     const campos: Record<string, string> = {
       subject: `Consulta desde la web — ${String(datos.get("Nombre") ?? "")}`,
       from_name: "Web NODO",
       Nombre: String(datos.get("Nombre") ?? ""),
-      Rubro: String(datos.get("Rubro") ?? ""),
+      Rubro: rubroElegido === "Otro" && detalle ? `Otro: ${detalle}` : rubroElegido,
       Mensaje: String(datos.get("Mensaje") ?? ""),
     };
 
