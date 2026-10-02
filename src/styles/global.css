@@ -427,17 +427,6 @@ input[type="checkbox"] {
 }
 
 /* ------------------------------------------------------------------ */
-/* Lectura de gráfico (canvas, ver grafico.ts): la línea de tendencia  */
-/* que el cursor va "leyendo", como fondo del bloque principal del     */
-/* Inicio. El texto del bloque va encima, con posición propia.         */
-/* ------------------------------------------------------------------ */
-.js-grafico {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-/* ------------------------------------------------------------------ */
 /* Lenguaje de reporte: iconos de tema, barras del gráfico de Inicio   */
 /* y barras de avance de los pasos.                                    */
 /* ------------------------------------------------------------------ */
@@ -522,6 +511,80 @@ input[type="checkbox"] {
   }
 
   html.js .is-visible .avance > div {
+    transform: scaleX(1);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Fichas de "¿Cómo funciona?": brillo en reposo sobre la parte roja,  */
+/* y al pasar el mouse (o tocar/enfocar en celular) la ficha se eleva, */
+/* su número pasa a rojo, su barra se recarga desde cero y las fichas  */
+/* siguientes se atenúan: "llegaste hasta este paso".                  */
+/* ------------------------------------------------------------------ */
+.ficha-paso {
+  transition:
+    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.3s ease;
+  outline-offset: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html.js .ficha-paso:hover,
+  html.js .ficha-paso:focus-visible {
+    transform: translateY(-4px);
+  }
+
+  html.js .ficha-paso:hover .paso-num,
+  html.js .ficha-paso:focus-visible .paso-num {
+    color: var(--accent);
+  }
+
+  /* brillo en reposo: recorre la parte llena, desfasado entre fichas */
+  html.js .avance > div {
+    position: relative;
+    overflow: hidden;
+  }
+
+  html.js .avance > div::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    width: 55%;
+    background: linear-gradient(
+      105deg,
+      transparent 0%,
+      rgb(255 255 255 / 0.55) 50%,
+      transparent 100%
+    );
+    transform: translateX(-130%) skewX(-18deg);
+    animation: btn-brillo 4.8s linear infinite;
+    animation-delay: var(--bd, 0s);
+  }
+
+  html.js .ficha-paso.fuera .avance > div::after {
+    animation-play-state: paused;
+  }
+
+  /* al pasar el mouse, la barra se vuelve a llenar desde cero */
+  html.js .ficha-paso:hover .avance > div,
+  html.js .ficha-paso:focus-visible .avance > div {
+    animation: avance-recarga 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  /* las fichas siguientes a la señalada se atenúan */
+  html.js .fichas-pasos:has(.ficha-paso:hover) .ficha-paso:hover ~ .ficha-paso,
+  html.js .fichas-pasos:has(.ficha-paso:focus-visible)
+    .ficha-paso:focus-visible
+    ~ .ficha-paso {
+    opacity: 0.45;
+  }
+}
+
+@keyframes avance-recarga {
+  from {
+    transform: scaleX(0);
+  }
+  to {
     transform: scaleX(1);
   }
 }

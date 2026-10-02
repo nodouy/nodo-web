@@ -1,14 +1,9 @@
 ---
 /**
- * Sección de agenda, en dos modos:
- *
- * - Sin calendario (Inicio): título, bajada y dos botones — uno a la
- *   página de Contacto y el de WhatsApp. El calendario embebido no va
- *   en Inicio: es un elemento visual de Google ajeno al sistema de
- *   diseño, pesa, y en celular se comporta mal.
- * - Con calendario (Contacto): el recuadro embebido en escritorio; en
- *   celular, un botón que abre la página de reservas en una pestaña
- *   nueva, porque el embebido queda demasiado alto en pantallas chicas.
+ * Bloque de agenda, en el lenguaje del reporte y alineado a la
+ * izquierda. En Contacto lleva el calendario embebido (en celular, un
+ * botón que abre la página de reservas en pestaña nueva); en el resto,
+ * dos botones.
  */
 import { site, waLink } from "../data/site";
 import { agenda } from "../data/inicio";
@@ -20,16 +15,14 @@ interface Props {
 const { conCalendario = false } = Astro.props;
 ---
 
-<section id="agenda" class="mx-auto max-w-6xl scroll-mt-24 px-5 py-16 md:py-24">
-  <div class="reveal mx-auto max-w-xl text-center">
-    <h2 class="text-3xl md:text-4xl">{agenda.titulo}</h2>
-    <p class="mt-3 text-muted">{agenda.bajada}</p>
-  </div>
+<section id="agenda" class="reveal scroll-mt-6 rounded-lg bg-raised p-6 md:p-7">
+  <h2 class="text-2xl font-medium md:text-3xl">{agenda.titulo}</h2>
+  <p class="mt-2 max-w-2xl text-muted">{agenda.bajada}</p>
 
   {
     conCalendario && site.calendarioUrl ? (
       <>
-        <div class="reveal mt-8 hidden overflow-hidden rounded-3xl border border-line bg-raised md:block">
+        <div class="mt-5 hidden overflow-hidden rounded-lg border border-line md:block">
           <iframe
             src={site.calendarioUrl}
             title="Calendario para agendar una reunión con NODO"
@@ -37,21 +30,21 @@ const { conCalendario = false } = Astro.props;
             loading="lazy"
           />
         </div>
-        <div class="reveal mt-8 flex flex-col items-center gap-3 md:hidden">
-          <Boton href={site.calendarioCorto} externo evento="agenda_click">
+        <div class="mt-5 flex flex-col items-start gap-3 md:hidden">
+          <Boton href={site.calendarioCorto} externo evento="agenda_click" class="h-11 px-5! py-0! text-[15px]">
             {agenda.botonCelular}
           </Boton>
-          <Boton href={waLink} externo variante="outline" flecha={false}>
+          <Boton href={waLink} externo variante="outline" flecha={false} class="h-11 px-5! py-0! text-[15px]">
             {agenda.botonWhatsapp}
           </Boton>
         </div>
       </>
     ) : (
-      <div class="reveal mt-8 flex flex-wrap justify-center gap-3">
-        <Boton href="/contacto#agenda" evento="agenda_click">
+      <div class="mt-5 flex flex-wrap gap-3">
+        <Boton href="/contacto#agenda" evento="agenda_click" class="h-11 px-5! py-0! text-[15px]">
           {agenda.botonAgenda}
         </Boton>
-        <Boton href={waLink} externo variante="outline" flecha={false}>
+        <Boton href={waLink} externo variante="outline" flecha={false} class="h-11 px-5! py-0! text-[15px]">
           {agenda.botonWhatsapp}
         </Boton>
       </div>
