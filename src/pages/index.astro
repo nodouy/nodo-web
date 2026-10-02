@@ -59,8 +59,10 @@ const altoMax = Math.max(...graficoInicio.barras.map((b) => b.alto));
           acá quedan solo los dos botones. */}
     </section>
 
+    {/* En celular esta tarjeta se oculta para aliviar la página: el
+        bloque principal, las píldoras, los pasos y los planes alcanzan */}
     <section
-      class="js-pausable reveal reveal-d1 flex min-h-[25rem] min-w-0 flex-[1_1_300px] flex-col overflow-hidden rounded-lg bg-raised"
+      class="js-pausable reveal reveal-d1 hidden min-h-[25rem] min-w-0 flex-[1_1_300px] flex-col overflow-hidden rounded-lg bg-raised md:flex"
     >
       <div class="flex flex-col items-start gap-3.5 p-6 pb-0">
         <h2 class="text-sm">{graficoInicio.titulo}</h2>
@@ -93,20 +95,20 @@ const altoMax = Math.max(...graficoInicio.barras.map((b) => b.alto));
     </section>
   </div>
 
-  {/* 3. Indicadores en píldora */}
-  <div class="flex flex-wrap gap-5">
+  {/* 3. Indicadores en píldora (compactos en celular, uno debajo del otro) */}
+  <div class="flex flex-wrap gap-3 md:gap-5">
     {
       indicadores.map((k, i) => (
         <a
           href={ruta(k.href)}
           aria-label={k.aria}
-          class={`card-i reveal reveal-d${i} flex min-w-0 flex-[1_1_300px] items-center justify-between gap-4 rounded-[80px] py-4 pl-8 pr-5 ${
+          class={`card-i reveal reveal-d${i} flex min-w-0 flex-[1_1_300px] items-center justify-between gap-4 rounded-[80px] py-3 pl-6 pr-4 md:py-4 md:pl-8 md:pr-5 ${
             k.oscuro ? "bg-inv text-inv-contra" : "bg-raised"
           }`}
         >
           <span class="flex min-w-0 flex-col gap-0.5">
             <span class="text-[13px]">{k.etiqueta}</span>
-            <span class="panel-num text-[28px] font-medium leading-[1.05] md:text-[22px]">
+            <span class="panel-num text-[22px] font-medium leading-[1.05]">
               {k.contadores.length === 2 ? (
                 <>
                   <span class="js-contador" data-valor={k.contadores[0]}>{k.contadores[0]}</span>
@@ -127,7 +129,7 @@ const altoMax = Math.max(...graficoInicio.barras.map((b) => b.alto));
             </span>
           </span>
           <span
-            class={`flex size-10 shrink-0 items-center justify-center rounded-full ${
+            class={`flex size-9 shrink-0 items-center justify-center rounded-full md:size-10 ${
               k.oscuro ? "bg-inv-contra text-inv" : "bg-body"
             }`}
             style={k.oscuro ? undefined : "color: var(--bg)"}
@@ -145,12 +147,13 @@ const altoMax = Math.max(...graficoInicio.barras.map((b) => b.alto));
     {comoFunciona.titulo}
     <span class="text-lg font-normal text-muted md:text-xl">{comoFunciona.contador}</span>
   </h2>
-  <div class="fichas-pasos flex flex-wrap gap-5">
+  {/* En celular los pasos van en una fila deslizable hacia el costado */}
+  <div class="fichas-pasos fila-desliza -mx-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-1 md:mx-0 md:flex-wrap md:gap-5 md:overflow-visible md:px-0 md:pb-0">
     {
       comoFunciona.pasos.map((p, i) => (
         <section
           tabindex="0"
-          class={`ficha-paso js-pausable reveal reveal-d${i % 4} flex min-w-0 flex-[1_1_200px] flex-col gap-3 rounded-lg bg-raised p-6`}
+          class={`ficha-paso js-pausable reveal reveal-d${i % 4} flex min-w-0 flex-[0_0_72%] snap-start flex-col gap-3 rounded-lg bg-raised p-6 md:flex-[1_1_200px]`}
         >
           <div class="avance" aria-hidden="true">
             <div style={`width:${(i + 1) * 20}%; --d:${i * 120}ms; --bd:${i * 0.9}s`} />

@@ -2,9 +2,13 @@
 /**
  * Los tres paneles de la página de servicios, uno por plan. Muestran la
  * diferencia real entre planes sin un párrafo de texto:
- *  - standard: la foto, un panel simple
- *  - pro: la película, comparación entre meses
- *  - full: el copiloto, alertas y rentabilidad por canal
+ *  - standard: la foto, qué pasó (ventas, total y gastos por categoría)
+ *  - pro: la película, cómo vengo (comparación entre meses y evolución
+ *    contra el período anterior)
+ *  - full: el copiloto, alertas, rentabilidad y actualización sola
+ *
+ * El contenido llena la pantalla 16:10 con márgenes parejos: el panel
+ * es una columna y sus filas se reparten el alto disponible.
  */
 import { leyendaFicticia } from "../data/site";
 
@@ -25,10 +29,22 @@ const canales = [
   { canal: "Web", ancho: 90, hot: true },
   { canal: "Revendedores", ancho: 38 },
 ];
+
+// Gastos por categoría del Standard: barras horizontales; el mayor en
+// rojo (negro lo normal, rojo lo que importa).
+const gastos = [
+  { rubro: "Mercadería", ancho: 84, hot: true },
+  { rubro: "Alquiler", ancho: 52 },
+  { rubro: "Servicios", ancho: 30 },
+];
+
+// Línea de evolución del Pro: el período actual contra el anterior.
+const evoAntes = "0,22 20,19 40,21 60,15 80,17 100,12";
+const evoAhora = "0,26 20,21 40,23 60,13 80,11 97,5";
 ---
 
-<div class="panel panel-anim">
-  <div class="mb-3 flex items-center justify-between gap-2">
+<div class="panel panel-anim flex flex-col">
+  <div class="mb-2 flex items-center justify-between gap-2">
     <span class="panel-muted">
       {tipo === "standard" && "Tu negocio hasta hoy"}
       {tipo === "pro" && "Junio comparado con mayo"}
@@ -39,25 +55,46 @@ const canales = [
 
   {
     tipo === "standard" && (
-      <div class="grid grid-cols-5 gap-2">
-        <div class="panel-card col-span-3">
-          <p class="panel-muted">Ventas por producto</p>
-          <div class="bars mt-3" aria-hidden="true">
-            <div class="bar" style="height:55%" />
-            <div class="bar bar--hot" style="height:92%" />
-            <div class="bar" style="height:40%" />
-            <div class="bar" style="height:66%" />
-            <div class="bar bar--soft" style="height:24%" />
+      <div class="flex min-h-0 flex-1 flex-col gap-2">
+        <div class="grid min-h-0 flex-1 grid-cols-5 gap-2">
+          <div class="panel-card col-span-3 flex min-h-0 flex-col">
+            <p class="panel-muted">Ventas por producto</p>
+            <div class="bars mt-2 h-auto! min-h-0 flex-1" aria-hidden="true">
+              <div class="bar" style="height:55%" />
+              <div class="bar bar--hot" style="height:92%" />
+              <div class="bar" style="height:40%" />
+              <div class="bar" style="height:66%" />
+              <div class="bar bar--soft" style="height:24%" />
+            </div>
+          </div>
+          <div class="panel-card col-span-2 flex flex-col justify-between">
+            <p class="panel-muted">Ventas del semestre</p>
+            <p class="panel-num text-lg leading-tight">
+              <span class="js-contador" data-valor="1842300" data-prefijo="$ ">$ 1.842.300</span>
+            </p>
+            <p class="panel-muted">
+              <span class="js-contador" data-valor="312">312</span> pedidos
+            </p>
           </div>
         </div>
-        <div class="panel-card col-span-2 flex flex-col justify-between">
-          <p class="panel-muted">Ventas del semestre</p>
-          <p class="panel-num text-lg leading-tight">
-            <span class="js-contador" data-valor="1842300" data-prefijo="$ ">$ 1.842.300</span>
-          </p>
-          <p class="panel-muted">
-            <span class="js-contador" data-valor="312">312</span> pedidos
-          </p>
+        <div class="panel-card panel-extra">
+          <div class="flex items-center justify-between gap-2">
+            <p class="panel-muted">Gastos por categoría</p>
+            <span class="panel-muted text-[0.6rem]">junio</span>
+          </div>
+          <div class="mt-2 flex flex-col gap-1.5" aria-hidden="true">
+            {gastos.map((g, i) => (
+              <div class="flex items-center gap-2">
+                <span class="panel-muted w-16 shrink-0 text-[0.6rem]">{g.rubro}</span>
+                <div class="h-2 flex-1 rounded-full" style="background: var(--pantalla)">
+                  <div
+                    class={`canal h-full rounded-full ${g.hot ? "bg-block" : "bg-body"}`}
+                    style={`width:${g.ancho}%; transition-delay:${i * 130}ms`}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     )
@@ -65,29 +102,72 @@ const canales = [
 
   {
     tipo === "pro" && (
-      <div class="grid grid-cols-5 gap-2">
-        <div class="panel-card col-span-3">
-          <p class="panel-muted">Mes a mes, por rubro</p>
-          <div class="bars mt-3 gap-[4%]!" aria-hidden="true">
-            {mesesPro.map((m) => (
-              <>
-                <div class="bar bar--soft" style={`height:${m.antes}%`} />
-                <div class={`bar ${m.hot ? "bar--hot" : ""}`} style={`height:${m.ahora}%`} />
-              </>
-            ))}
+      <div class="flex min-h-0 flex-1 flex-col gap-2">
+        <div class="grid min-h-0 flex-1 grid-cols-5 gap-2">
+          <div class="panel-card col-span-3 flex min-h-0 flex-col">
+            <p class="panel-muted">Mes a mes, por rubro</p>
+            <div class="bars mt-2 h-auto! min-h-0 flex-1 gap-[4%]!" aria-hidden="true">
+              {mesesPro.map((m) => (
+                <>
+                  <div class="bar bar--soft" style={`height:${m.antes}%`} />
+                  <div class={`bar ${m.hot ? "bar--hot" : ""}`} style={`height:${m.ahora}%`} />
+                </>
+              ))}
+            </div>
+            <div class="mt-1 flex gap-[4%]" aria-hidden="true">
+              {mesesPro.map((m) => (
+                <span class="panel-muted flex-[2] text-center text-[0.55rem]">{m.mes}</span>
+              ))}
+            </div>
           </div>
-          <div class="mt-1.5 flex gap-[4%]" aria-hidden="true">
-            {mesesPro.map((m) => (
-              <span class="panel-muted flex-[2] text-center text-[0.55rem]">{m.mes}</span>
-            ))}
+          <div class="panel-card panel-card--dark col-span-2 flex flex-col justify-between">
+            <p class="panel-muted">Este mes</p>
+            <p class="panel-num text-lg leading-tight">
+              <span class="js-contador" data-valor="384100" data-prefijo="$ ">$ 384.100</span>
+            </p>
+            <p class="panel-muted">contra $ 341.500 en mayo</p>
           </div>
         </div>
-        <div class="panel-card panel-card--dark col-span-2 flex flex-col justify-between">
-          <p class="panel-muted">Este mes</p>
-          <p class="panel-num text-lg leading-tight">
-            <span class="js-contador" data-valor="384100" data-prefijo="$ ">$ 384.100</span>
-          </p>
-          <p class="panel-muted">contra $ 341.500 en mayo</p>
+        <div class="panel-card panel-extra">
+          <div class="flex items-center justify-between gap-2">
+            <p class="panel-muted">Evolución del semestre</p>
+            <span class="panel-muted flex items-center gap-2 text-[0.6rem]">
+              <span class="flex items-center gap-1">
+                <i class="h-0.5 w-3 rounded-full bg-body" /> este período
+              </span>
+              <span class="flex items-center gap-1">
+                <i class="h-0.5 w-3 rounded-full" style="background: var(--line)" /> anterior
+              </span>
+            </span>
+          </div>
+          <svg
+            class="mt-1.5 h-9 w-full"
+            viewBox="0 0 100 30"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <polyline
+              points={evoAntes}
+              fill="none"
+              stroke="var(--line)"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              vector-effect="non-scaling-stroke"
+            />
+            <polyline
+              class="linea-evo"
+              points={evoAhora}
+              fill="none"
+              stroke="var(--fg)"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              vector-effect="non-scaling-stroke"
+              pathLength="1"
+            />
+            <circle class="punto-evo" cx="97" cy="5" r="2" fill="var(--block)" />
+          </svg>
         </div>
       </div>
     )
@@ -95,7 +175,7 @@ const canales = [
 
   {
     tipo === "full" && (
-      <div class="flex flex-col gap-2">
+      <div class="flex min-h-0 flex-1 flex-col gap-2">
         <div class="panel-alerta panel-card panel-card--rojo flex items-center justify-between gap-2">
           <div>
             <p class="text-[0.7rem] font-medium uppercase tracking-wide">Alerta</p>
@@ -103,12 +183,12 @@ const canales = [
           </div>
           <span class="pill bg-white/15 text-white">hoy 09:14</span>
         </div>
-        <div class="panel-card">
+        <div class="panel-card flex min-h-0 flex-1 flex-col">
           <div class="flex items-center justify-between gap-2">
             <p class="panel-muted">Rentabilidad por canal de venta</p>
             <span class="panel-muted text-[0.6rem]">actualizado solo</span>
           </div>
-          <div class="mt-2.5 flex flex-col gap-1.5" aria-hidden="true">
+          <div class="mt-auto flex flex-col gap-1.5 pt-2" aria-hidden="true">
             {canales.map((c, i) => (
               <div class="flex items-center gap-2">
                 <span class="panel-muted w-20 shrink-0 text-[0.6rem]">{c.canal}</span>
@@ -121,6 +201,10 @@ const canales = [
               </div>
             ))}
           </div>
+        </div>
+        <div class="panel-card panel-card--dark panel-extra flex items-center justify-between gap-2">
+          <p class="panel-muted">Datos actualizados solos</p>
+          <p class="panel-num text-[0.7rem]">próxima: mañana 06:00</p>
         </div>
       </div>
     )

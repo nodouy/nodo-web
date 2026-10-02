@@ -41,7 +41,9 @@ const { frase, destacada, variante, verMas = false } = Astro.props;
     }
   </div>
 
-  <div class={`ilus ilus-${variante} justify-self-start md:justify-self-end`} aria-hidden="true">
+  {/* En celular la ilustración se oculta: aliviana la página y ahorra
+      un bucle de animación en pantallas chicas */}
+  <div class={`ilus ilus-${variante} hidden md:block md:justify-self-end`} aria-hidden="true">
     {
       variante === "planes" && (
         <>

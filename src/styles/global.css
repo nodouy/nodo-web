@@ -267,7 +267,9 @@ h4 {
   background: var(--pantalla);
   color: var(--fg);
   padding: 5%;
-  font-size: 0.8rem;
+  /* Tipografía fluida según el ancho real de la notebook (340 a 560 px):
+     así el contenido llena la pantalla 16:10 sin aplastarse en celular */
+  font-size: clamp(0.55rem, 2.6cqw, 0.8rem);
   line-height: 1.35;
   display: flex;
   flex-direction: column;
@@ -276,7 +278,7 @@ h4 {
 .panel-card {
   background: var(--chip);
   border-radius: 0.7rem;
-  padding: 0.8rem 0.9rem;
+  padding: clamp(0.45rem, 2.2cqw, 0.8rem) clamp(0.5rem, 2.4cqw, 0.9rem);
 }
 
 .panel-card--dark {
@@ -296,7 +298,21 @@ h4 {
 
 .panel-muted {
   color: var(--fg-muted);
-  font-size: 0.7rem;
+  font-size: clamp(0.5rem, 2.2cqw, 0.7rem);
+}
+
+/* Las cifras grandes y las etiquetas chicas del panel también escalan
+   con la notebook */
+.panel .text-lg {
+  font-size: clamp(0.72rem, 3.4cqw, 1.125rem);
+}
+
+.panel .text-\[0\.75rem\] {
+  font-size: clamp(0.55rem, 2.4cqw, 0.75rem);
+}
+
+.panel .text-\[0\.7rem\] {
+  font-size: clamp(0.52rem, 2.2cqw, 0.7rem);
 }
 
 .panel-card--dark .panel-muted {
@@ -307,11 +323,21 @@ h4 {
   color: rgb(255 255 255 / 0.75);
 }
 
+/* Cuando la notebook queda chica (celular y tablet a dos columnas), la
+   visualización extra de cada panel se oculta: en una pantalla de
+   ~230 px no entran tres bloques, y la vista liviana es la prioridad. */
+@container (max-width: 429px) {
+  .panel-extra {
+    display: none;
+  }
+}
+
 .pill-ficticio {
   background: var(--fg);
   color: var(--pantalla);
-  font-size: 10px;
-  padding: 0.25rem 0.65rem;
+  font-size: clamp(7.5px, 2cqw, 10px);
+  padding: clamp(0.15rem, 0.8cqw, 0.25rem) clamp(0.4rem, 1.6cqw, 0.65rem);
+  white-space: nowrap;
 }
 
 /* Barras de los paneles */
@@ -362,6 +388,8 @@ h4 {
   width: 100%;
   padding-inline: 7%;
   box-sizing: border-box;
+  /* Contenedor de consulta: el panel adapta su tipografía a este ancho */
+  container-type: inline-size;
 }
 
 .notebook-pantalla {
@@ -710,6 +738,35 @@ input[type="checkbox"] {
     .ficha-paso:focus-visible
     ~ .ficha-paso {
     opacity: 0.45;
+  }
+}
+
+/* Fila deslizable de los pasos en celular: sin barra de scroll visible */
+.fila-desliza {
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.fila-desliza::-webkit-scrollbar {
+  display: none;
+}
+
+/* ------------------------------------------------------------------ */
+/* Animaciones más livianas en celular: los bucles decorativos         */
+/* (destellos de botones y fichas, respiración de las grillas chicas,  */
+/* pulso de la alerta) se apagan en pantallas chicas. Las entradas y   */
+/* los contadores quedan.                                              */
+/* ------------------------------------------------------------------ */
+@media (max-width: 767px) {
+  html.js .btn-brillo::after,
+  html.js .avance > div::after {
+    animation: none !important;
+    opacity: 0;
+  }
+
+  html.js .mini-grilla.mg-viva .mg-dot,
+  html.js .panel-anim.is-visible .panel-alerta {
+    animation: none !important;
   }
 }
 
@@ -1291,6 +1348,27 @@ input[type="checkbox"] {
 
   html.js .panel-anim.is-visible .canal {
     transform: scaleX(1);
+  }
+
+  /* La línea de evolución del Pro se dibuja al entrar; el punto rojo
+     (el dato que hay que mirar) aparece cuando el trazo llega al final */
+  html.js .panel-anim .linea-evo {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    transition: stroke-dashoffset 0.9s ease-out 0.5s;
+  }
+
+  html.js .panel-anim.is-visible .linea-evo {
+    stroke-dashoffset: 0;
+  }
+
+  html.js .panel-anim .punto-evo {
+    opacity: 0;
+    transition: opacity 0.3s ease 1.35s;
+  }
+
+  html.js .panel-anim.is-visible .punto-evo {
+    opacity: 1;
   }
 
   html.js .panel-anim .panel-alerta {
